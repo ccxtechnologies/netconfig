@@ -89,176 +89,6 @@ ETHTOOL_SRSSH = 0x00000047  # Set RX flow hash configuration
 ETHTOOL_GTUNABLE = 0x00000048  # Get tunable configuration
 ETHTOOL_STUNABLE = 0x00000049  # Set tunable configuration
 
-SUPPORTED_10baseT_Half = (1 << 0)
-SUPPORTED_10baseT_Full = (1 << 1)
-SUPPORTED_100baseT_Half = (1 << 2)
-SUPPORTED_100baseT_Full = (1 << 3)
-SUPPORTED_1000baseT_Half = (1 << 4)
-SUPPORTED_1000baseT_Full = (1 << 5)
-SUPPORTED_Autoneg = (1 << 6)
-SUPPORTED_TP = (1 << 7)
-SUPPORTED_AUI = (1 << 8)
-SUPPORTED_MII = (1 << 9)
-SUPPORTED_FIBRE = (1 << 10)
-SUPPORTED_BNC = (1 << 11)
-SUPPORTED_10000baseT_Full = (1 << 12)
-SUPPORTED_Pause = (1 << 13)
-SUPPORTED_Asym_Pause = (1 << 14)
-SUPPORTED_2500baseX_Full = (1 << 15)
-SUPPORTED_Backplane = (1 << 16)
-SUPPORTED_1000baseKX_Full = (1 << 17)
-SUPPORTED_10000baseKX4_Full = (1 << 18)
-SUPPORTED_10000baseKR_Full = (1 << 19)
-SUPPORTED_10000baseR_FEC = (1 << 20)
-SUPPORTED_20000baseMLD2_Full = (1 << 21)
-SUPPORTED_20000baseKR2_Full = (1 << 22)
-SUPPORTED_40000baseKR4_Full = (1 << 23)
-SUPPORTED_40000baseCR4_Full = (1 << 24)
-SUPPORTED_40000baseSR4_Full = (1 << 25)
-SUPPORTED_40000baseLR4_Full = (1 << 26)
-SUPPORTED_56000baseKR4_Full = (1 << 27)
-SUPPORTED_56000baseCR4_Full = (1 << 28)
-SUPPORTED_56000baseSR4_Full = (1 << 29)
-SUPPORTED_56000baseLR4_Full = (1 << 30)
-ADVERTISED_10baseT_Half = (1 << 0)
-ADVERTISED_10baseT_Full = (1 << 1)
-ADVERTISED_100baseT_Half = (1 << 2)
-ADVERTISED_100baseT_Full = (1 << 3)
-ADVERTISED_1000baseT_Half = (1 << 4)
-ADVERTISED_1000baseT_Full = (1 << 5)
-ADVERTISED_Autoneg = (1 << 6)
-ADVERTISED_TP = (1 << 7)
-ADVERTISED_AUI = (1 << 8)
-ADVERTISED_MII = (1 << 9)
-ADVERTISED_FIBRE = (1 << 10)
-ADVERTISED_BNC = (1 << 11)
-ADVERTISED_10000baseT_Full = (1 << 12)
-ADVERTISED_Pause = (1 << 13)
-ADVERTISED_Asym_Pause = (1 << 14)
-ADVERTISED_2500baseX_Full = (1 << 15)
-ADVERTISED_Backplane = (1 << 16)
-ADVERTISED_1000baseKX_Full = (1 << 17)
-ADVERTISED_10000baseKX4_Full = (1 << 18)
-ADVERTISED_10000baseKR_Full = (1 << 19)
-ADVERTISED_10000baseR_FEC = (1 << 20)
-ADVERTISED_20000baseMLD2_Full = (1 << 21)
-ADVERTISED_20000baseKR2_Full = (1 << 22)
-ADVERTISED_40000baseKR4_Full = (1 << 23)
-ADVERTISED_40000baseCR4_Full = (1 << 24)
-ADVERTISED_40000baseSR4_Full = (1 << 25)
-ADVERTISED_40000baseLR4_Full = (1 << 26)
-ADVERTISED_56000baseKR4_Full = (1 << 27)
-ADVERTISED_56000baseCR4_Full = (1 << 28)
-ADVERTISED_56000baseSR4_Full = (1 << 29)
-ADVERTISED_56000baseLR4_Full = (1 << 30)
-
-# The forced speed, 10Mb, 100Mb, gigabit, [2.5|5|10|20|25|40|50|56|100]GbE.
-SPEED_10 = 10
-SPEED_100 = 100
-SPEED_1000 = 1000
-SPEED_2500 = 2500
-SPEED_5000 = 5000
-SPEED_10000 = 10000
-SPEED_20000 = 20000
-SPEED_25000 = 25000
-SPEED_40000 = 40000
-SPEED_50000 = 50000
-SPEED_56000 = 56000
-SPEED_100000 = 100000
-SPEED_UNKNOWN = -1
-
-# Duplex, half or full.
-DUPLEX_HALF = 0x00
-DUPLEX_FULL = 0x01
-DUPLEX_UNKNOWN = 0xff
-
-# Which connector port.
-PORT_TP = 0x00
-PORT_AUI = 0x01
-PORT_MII = 0x02
-PORT_FIBRE = 0x03
-PORT_BNC = 0x04
-PORT_DA = 0x05
-PORT_NONE = 0xef
-PORT_OTHER = 0xff
-
-# Which transceiver to use.
-XCVR_INTERNAL = 0x00  # PHY and MAC are in the same package
-XCVR_EXTERNAL = 0x01  # PHY and MAC are in different packages
-XCVR_DUMMY1 = 0x02
-XCVR_DUMMY2 = 0x03
-XCVR_DUMMY3 = 0x04
-
-# Enable or disable autonegotiation.
-AUTONEG_DISABLE = 0x00
-AUTONEG_ENABLE = 0x01
-
-# MDI or MDI-X status/control - if MDI/MDI_X/AUTO is set then
-#  the driver is required to renegotiate link
-
-ETH_TP_MDI_INVALID = 0x00  # status: unknown; control: unsupported
-ETH_TP_MDI = 0x01  # status: MDI;     control: force MDI
-ETH_TP_MDI_X = 0x02  # status: MDI-X;   control: force MDI-X
-ETH_TP_MDI_AUTO = 0x03  # control: auto-select
-
-# Wake-On-Lan options.
-WAKE_PHY = (1 << 0)
-WAKE_UCAST = (1 << 1)
-WAKE_MCAST = (1 << 2)
-WAKE_BCAST = (1 << 3)
-WAKE_ARP = (1 << 4)
-WAKE_MAGIC = (1 << 5)
-WAKE_MAGICSECURE = (1 << 6)  # only meaningful if WAKE_MAGIC
-
-# L2-L4 network traffic flow types
-TCP_V4_FLOW = 0x01  # hash or spec (tcp_ip4_spec)
-UDP_V4_FLOW = 0x02  # hash or spec (udp_ip4_spec)
-SCTP_V4_FLOW = 0x03  # hash or spec (sctp_ip4_spec)
-AH_ESP_V4_FLOW = 0x04  # hash only
-TCP_V6_FLOW = 0x05  # hash only
-UDP_V6_FLOW = 0x06  # hash only
-SCTP_V6_FLOW = 0x07  # hash only
-AH_ESP_V6_FLOW = 0x08  # hash only
-AH_V4_FLOW = 0x09  # hash or spec (ah_ip4_spec)
-ESP_V4_FLOW = 0x0a  # hash or spec (esp_ip4_spec)
-AH_V6_FLOW = 0x0b  # hash only
-ESP_V6_FLOW = 0x0c  # hash only
-IP_USER_FLOW = 0x0d  # spec only (usr_ip4_spec)
-IPV4_FLOW = 0x10  # hash only
-IPV6_FLOW = 0x11  # hash only
-ETHER_FLOW = 0x12  # spec only (ether_spec)
-# Flag to enable additional fields in struct ethtool_rx_flow_spec
-FLOW_EXT = 0x80000000
-FLOW_MAC_EXT = 0x40000000
-
-# L3-L4 network traffic flow hash options
-RXH_L2DA = (1 << 1)
-RXH_VLAN = (1 << 2)
-RXH_L3_PROTO = (1 << 3)
-RXH_IP_SRC = (1 << 4)
-RXH_IP_DST = (1 << 5)
-RXH_L4_B_0_1 = (1 << 6)  # src port in case of TCP/UDP/SCTP
-RXH_L4_B_2_3 = (1 << 7)  # dst port in case of TCP/UDP/SCTP
-RXH_DISCARD = (1 << 31)
-
-RX_CLS_FLOW_DISC = 0xffffffffffffffff
-
-# Special RX classification rule insert location values
-RX_CLS_LOC_SPECIAL = 0x80000000  # flag
-RX_CLS_LOC_ANY = 0xffffffff
-RX_CLS_LOC_FIRST = 0xfffffffe
-RX_CLS_LOC_LAST = 0xfffffffd
-
-# EEPROM Standards for plug in modules
-ETH_MODULE_SFF_8079 = 0x1
-ETH_MODULE_SFF_8079_LEN = 256
-ETH_MODULE_SFF_8472 = 0x2
-ETH_MODULE_SFF_8472_LEN = 512
-ETH_MODULE_SFF_8636 = 0x3
-ETH_MODULE_SFF_8636_LEN = 256
-ETH_MODULE_SFF_8436 = 0x4
-ETH_MODULE_SFF_8436_LEN = 256
-
 
 class ethtool_cmd(ctypes.Structure):
     _pack_ = 1
@@ -307,104 +137,178 @@ class ifreq(ctypes.Structure):
 
 # ============================================================================
 
-def _dump_supported(mask):
-    supported = []
-
-    if mask & SUPPORTED_Autoneg:
-        supported.append("Auto-Negotiate")
-
-    if mask & SUPPORTED_10baseT_Half:
-        supported.append("10baseT/Half")
-
-    if mask & SUPPORTED_10baseT_Full:
-        supported.append("10baseT/Full")
-
-    if mask & SUPPORTED_100baseT_Half:
-        supported.append("100baseT/Half")
-
-    if mask & SUPPORTED_100baseT_Full:
-        supported.append("100baseT/Full")
-
-    if mask & SUPPORTED_1000baseT_Half:
-        supported.append("1000baseT/Half")
-
-    if mask & SUPPORTED_1000baseT_Full:
-        supported.append("1000baseT/Full")
-
-    if mask & SUPPORTED_2500baseX_Full:
-        supported.append("2500baseX/Full")
-
-    return supported
-
-
-def _dump_advertised(mask):
-    advertising = []
-
-    if mask & ADVERTISED_Autoneg:
-        advertising.append("Auto-Negotiate")
-
-    if mask & ADVERTISED_10baseT_Half:
-        advertising.append("10baseT/Half")
-
-    if mask & ADVERTISED_10baseT_Full:
-        advertising.append("10baseT/Full")
-
-    if mask & ADVERTISED_100baseT_Half:
-        advertising.append("100baseT/Half")
-
-    if mask & ADVERTISED_100baseT_Full:
-        advertising.append("100baseT/Full")
-
-    if mask & ADVERTISED_1000baseT_Half:
-        advertising.append("1000baseT/Half")
-
-    if mask & ADVERTISED_1000baseT_Full:
-        advertising.append("1000baseT/Full")
-
-    if mask & ADVERTISED_2500baseX_Full:
-        advertising.append("2500baseX/Full")
-
-    if mask & ADVERTISED_10000baseT_Full:
-        advertising.append("10000baseT/Full")
-
-    return advertising
-
-
-def _dump_ecmd(ep):
-    settings = {}
-    settings["supported"] = _dump_supported(ep.supported)
-    settings["advertised"] = _dump_advertised(ep.advertising)
-    settings["link_partner"] = _dump_advertised(ep.lp_advertising)
-
-    if ep.speed == SPEED_10:
-        settings['speed'] = "10Mb/s"
-    elif ep.speed == SPEED_100:
-        settings['speed'] = "100Mb/s"
-    elif ep.speed == SPEED_1000:
-        settings['speed'] = "1000Mb/s"
-    elif ep.speed == SPEED_2500:
-        settings['speed'] = "2500Mb/s"
-    elif ep.speed == SPEED_10000:
-        settings['speed'] = "10000Mb/s"
-    else:
-        settings['speed'] = f"Unknown! ({ep.speed})"
-
-    if ep.duplex == DUPLEX_HALF:
-        settings['duplex'] = "Half"
-    elif ep.duplex == DUPLEX_FULL:
-        settings['duplex'] = "Full"
-    else:
-        settings['duplex'] = f"Unknown! ({ep.duplex})"
-
-    if ep.autoneg == AUTONEG_DISABLE:
-        settings['autoneg'] = False
-    else:
-        settings['autoneg'] = True
-
-    return settings
-
 
 class EthTool:
+    SUPPORTED_10baseT_Half = (1 << 0)
+    SUPPORTED_10baseT_Full = (1 << 1)
+    SUPPORTED_100baseT_Half = (1 << 2)
+    SUPPORTED_100baseT_Full = (1 << 3)
+    SUPPORTED_1000baseT_Half = (1 << 4)
+    SUPPORTED_1000baseT_Full = (1 << 5)
+    SUPPORTED_Autoneg = (1 << 6)
+    SUPPORTED_TP = (1 << 7)
+    SUPPORTED_AUI = (1 << 8)
+    SUPPORTED_MII = (1 << 9)
+    SUPPORTED_FIBRE = (1 << 10)
+    SUPPORTED_BNC = (1 << 11)
+    SUPPORTED_10000baseT_Full = (1 << 12)
+    SUPPORTED_Pause = (1 << 13)
+    SUPPORTED_Asym_Pause = (1 << 14)
+    SUPPORTED_2500baseX_Full = (1 << 15)
+    SUPPORTED_Backplane = (1 << 16)
+    SUPPORTED_1000baseKX_Full = (1 << 17)
+    SUPPORTED_10000baseKX4_Full = (1 << 18)
+    SUPPORTED_10000baseKR_Full = (1 << 19)
+    SUPPORTED_10000baseR_FEC = (1 << 20)
+    SUPPORTED_20000baseMLD2_Full = (1 << 21)
+    SUPPORTED_20000baseKR2_Full = (1 << 22)
+    SUPPORTED_40000baseKR4_Full = (1 << 23)
+    SUPPORTED_40000baseCR4_Full = (1 << 24)
+    SUPPORTED_40000baseSR4_Full = (1 << 25)
+    SUPPORTED_40000baseLR4_Full = (1 << 26)
+    SUPPORTED_56000baseKR4_Full = (1 << 27)
+    SUPPORTED_56000baseCR4_Full = (1 << 28)
+    SUPPORTED_56000baseSR4_Full = (1 << 29)
+    SUPPORTED_56000baseLR4_Full = (1 << 30)
+    ADVERTISED_10baseT_Half = (1 << 0)
+    ADVERTISED_10baseT_Full = (1 << 1)
+    ADVERTISED_100baseT_Half = (1 << 2)
+    ADVERTISED_100baseT_Full = (1 << 3)
+    ADVERTISED_1000baseT_Half = (1 << 4)
+    ADVERTISED_1000baseT_Full = (1 << 5)
+    ADVERTISED_Autoneg = (1 << 6)
+    ADVERTISED_TP = (1 << 7)
+    ADVERTISED_AUI = (1 << 8)
+    ADVERTISED_MII = (1 << 9)
+    ADVERTISED_FIBRE = (1 << 10)
+    ADVERTISED_BNC = (1 << 11)
+    ADVERTISED_10000baseT_Full = (1 << 12)
+    ADVERTISED_Pause = (1 << 13)
+    ADVERTISED_Asym_Pause = (1 << 14)
+    ADVERTISED_2500baseX_Full = (1 << 15)
+    ADVERTISED_Backplane = (1 << 16)
+    ADVERTISED_1000baseKX_Full = (1 << 17)
+    ADVERTISED_10000baseKX4_Full = (1 << 18)
+    ADVERTISED_10000baseKR_Full = (1 << 19)
+    ADVERTISED_10000baseR_FEC = (1 << 20)
+    ADVERTISED_20000baseMLD2_Full = (1 << 21)
+    ADVERTISED_20000baseKR2_Full = (1 << 22)
+    ADVERTISED_40000baseKR4_Full = (1 << 23)
+    ADVERTISED_40000baseCR4_Full = (1 << 24)
+    ADVERTISED_40000baseSR4_Full = (1 << 25)
+    ADVERTISED_40000baseLR4_Full = (1 << 26)
+    ADVERTISED_56000baseKR4_Full = (1 << 27)
+    ADVERTISED_56000baseCR4_Full = (1 << 28)
+    ADVERTISED_56000baseSR4_Full = (1 << 29)
+    ADVERTISED_56000baseLR4_Full = (1 << 30)
+
+    # The forced speed, 10Mb, 100Mb, gigabit, [2.5|5|10|20|25|40|50|56|100]GbE.
+    SPEED_10 = 10
+    SPEED_100 = 100
+    SPEED_1000 = 1000
+    SPEED_2500 = 2500
+    SPEED_5000 = 5000
+    SPEED_10000 = 10000
+    SPEED_20000 = 20000
+    SPEED_25000 = 25000
+    SPEED_40000 = 40000
+    SPEED_50000 = 50000
+    SPEED_56000 = 56000
+    SPEED_100000 = 100000
+    SPEED_UNKNOWN = -1
+
+    # Duplex, half or full.
+    DUPLEX_HALF = 0x00
+    DUPLEX_FULL = 0x01
+    DUPLEX_UNKNOWN = 0xff
+
+    # Which connector port.
+    PORT_TP = 0x00
+    PORT_AUI = 0x01
+    PORT_MII = 0x02
+    PORT_FIBRE = 0x03
+    PORT_BNC = 0x04
+    PORT_DA = 0x05
+    PORT_NONE = 0xef
+    PORT_OTHER = 0xff
+
+    # Which transceiver to use.
+    XCVR_INTERNAL = 0x00  # PHY and MAC are in the same package
+    XCVR_EXTERNAL = 0x01  # PHY and MAC are in different packages
+    XCVR_DUMMY1 = 0x02
+    XCVR_DUMMY2 = 0x03
+    XCVR_DUMMY3 = 0x04
+
+    # Enable or disable autonegotiation.
+    AUTONEG_DISABLE = 0x00
+    AUTONEG_ENABLE = 0x01
+
+    # MDI or MDI-X status/control - if MDI/MDI_X/AUTO is set then
+    #  the driver is required to renegotiate link
+
+    ETH_TP_MDI_INVALID = 0x00  # status: unknown; control: unsupported
+    ETH_TP_MDI = 0x01  # status: MDI;     control: force MDI
+    ETH_TP_MDI_X = 0x02  # status: MDI-X;   control: force MDI-X
+    ETH_TP_MDI_AUTO = 0x03  # control: auto-select
+
+    # Wake-On-Lan options.
+    WAKE_PHY = (1 << 0)
+    WAKE_UCAST = (1 << 1)
+    WAKE_MCAST = (1 << 2)
+    WAKE_BCAST = (1 << 3)
+    WAKE_ARP = (1 << 4)
+    WAKE_MAGIC = (1 << 5)
+    WAKE_MAGICSECURE = (1 << 6)  # only meaningful if WAKE_MAGIC
+
+    # L2-L4 network traffic flow types
+    TCP_V4_FLOW = 0x01  # hash or spec (tcp_ip4_spec)
+    UDP_V4_FLOW = 0x02  # hash or spec (udp_ip4_spec)
+    SCTP_V4_FLOW = 0x03  # hash or spec (sctp_ip4_spec)
+    AH_ESP_V4_FLOW = 0x04  # hash only
+    TCP_V6_FLOW = 0x05  # hash only
+    UDP_V6_FLOW = 0x06  # hash only
+    SCTP_V6_FLOW = 0x07  # hash only
+    AH_ESP_V6_FLOW = 0x08  # hash only
+    AH_V4_FLOW = 0x09  # hash or spec (ah_ip4_spec)
+    ESP_V4_FLOW = 0x0a  # hash or spec (esp_ip4_spec)
+    AH_V6_FLOW = 0x0b  # hash only
+    ESP_V6_FLOW = 0x0c  # hash only
+    IP_USER_FLOW = 0x0d  # spec only (usr_ip4_spec)
+    IPV4_FLOW = 0x10  # hash only
+    IPV6_FLOW = 0x11  # hash only
+    ETHER_FLOW = 0x12  # spec only (ether_spec)
+    # Flag to enable additional fields in struct ethtool_rx_flow_spec
+    FLOW_EXT = 0x80000000
+    FLOW_MAC_EXT = 0x40000000
+
+    # L3-L4 network traffic flow hash options
+    RXH_L2DA = (1 << 1)
+    RXH_VLAN = (1 << 2)
+    RXH_L3_PROTO = (1 << 3)
+    RXH_IP_SRC = (1 << 4)
+    RXH_IP_DST = (1 << 5)
+    RXH_L4_B_0_1 = (1 << 6)  # src port in case of TCP/UDP/SCTP
+    RXH_L4_B_2_3 = (1 << 7)  # dst port in case of TCP/UDP/SCTP
+    RXH_DISCARD = (1 << 31)
+
+    RX_CLS_FLOW_DISC = 0xffffffffffffffff
+
+    # Special RX classification rule insert location values
+    RX_CLS_LOC_SPECIAL = 0x80000000  # flag
+    RX_CLS_LOC_ANY = 0xffffffff
+    RX_CLS_LOC_FIRST = 0xfffffffe
+    RX_CLS_LOC_LAST = 0xfffffffd
+
+    # EEPROM Standards for plug in modules
+    ETH_MODULE_SFF_8079 = 0x1
+    ETH_MODULE_SFF_8079_LEN = 256
+    ETH_MODULE_SFF_8472 = 0x2
+    ETH_MODULE_SFF_8472_LEN = 512
+    ETH_MODULE_SFF_8636 = 0x3
+    ETH_MODULE_SFF_8636_LEN = 256
+    ETH_MODULE_SFF_8436 = 0x4
+    ETH_MODULE_SFF_8436_LEN = 256
+
     def __init__(self, ifname):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._name = (ctypes.c_ubyte *
@@ -436,7 +340,7 @@ class EthTool:
             else:
                 raise
 
-        return _dump_ecmd(ecmd)
+        return self._dump_ecmd(ecmd)
 
     def link_detected(self):
         ifr, evalue = self._ifreq_value()
@@ -458,7 +362,7 @@ class EthTool:
         fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
 
         ecmd.cmd = ETHTOOL_SSET
-        ecmd.autoneg = AUTONEG_ENABLE
+        ecmd.autoneg = self.AUTONEG_ENABLE
         fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
 
     def force_speed(self, speed, duplex):
@@ -468,7 +372,7 @@ class EthTool:
         fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
 
         ecmd.cmd = ETHTOOL_SSET
-        ecmd.autoneg = AUTONEG_DISABLE
+        ecmd.autoneg = self.AUTONEG_DISABLE
         ecmd.speed = speed
         ecmd.duplex = duplex
         fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
@@ -482,3 +386,97 @@ class EthTool:
         ecmd.cmd = ETHTOOL_SSET
         ecmd.advertising = ecmd.supported & advertise
         fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
+
+    def _dump_supported(self, mask):
+        supported = []
+
+        if mask & self.SUPPORTED_Autoneg:
+            supported.append("Auto-Negotiate")
+
+        if mask & self.SUPPORTED_10baseT_Half:
+            supported.append("10baseT/Half")
+
+        if mask & self.SUPPORTED_10baseT_Full:
+            supported.append("10baseT/Full")
+
+        if mask & self.SUPPORTED_100baseT_Half:
+            supported.append("100baseT/Half")
+
+        if mask & self.SUPPORTED_100baseT_Full:
+            supported.append("100baseT/Full")
+
+        if mask & self.SUPPORTED_1000baseT_Half:
+            supported.append("1000baseT/Half")
+
+        if mask & self.SUPPORTED_1000baseT_Full:
+            supported.append("1000baseT/Full")
+
+        if mask & self.SUPPORTED_2500baseX_Full:
+            supported.append("2500baseX/Full")
+
+        return supported
+
+    def _dump_advertised(self, mask):
+        advertising = []
+
+        if mask & self.ADVERTISED_Autoneg:
+            advertising.append("Auto-Negotiate")
+
+        if mask & self.ADVERTISED_10baseT_Half:
+            advertising.append("10baseT/Half")
+
+        if mask & self.ADVERTISED_10baseT_Full:
+            advertising.append("10baseT/Full")
+
+        if mask & self.ADVERTISED_100baseT_Half:
+            advertising.append("100baseT/Half")
+
+        if mask & self.ADVERTISED_100baseT_Full:
+            advertising.append("100baseT/Full")
+
+        if mask & self.ADVERTISED_1000baseT_Half:
+            advertising.append("1000baseT/Half")
+
+        if mask & self.ADVERTISED_1000baseT_Full:
+            advertising.append("1000baseT/Full")
+
+        if mask & self.ADVERTISED_2500baseX_Full:
+            advertising.append("2500baseX/Full")
+
+        if mask & self.ADVERTISED_10000baseT_Full:
+            advertising.append("10000baseT/Full")
+
+        return advertising
+
+    def _dump_ecmd(self, ep):
+        settings = {}
+        settings["supported"] = self._dump_supported(ep.supported)
+        settings["advertised"] = self._dump_advertised(ep.advertising)
+        settings["link_partner"] = self._dump_advertised(ep.lp_advertising)
+
+        if ep.speed == self.SPEED_10:
+            settings['speed'] = "10Mb/s"
+        elif ep.speed == self.SPEED_100:
+            settings['speed'] = "100Mb/s"
+        elif ep.speed == self.SPEED_1000:
+            settings['speed'] = "1000Mb/s"
+        elif ep.speed == self.SPEED_2500:
+            settings['speed'] = "2500Mb/s"
+        elif ep.speed == self.SPEED_10000:
+            settings['speed'] = "10000Mb/s"
+        else:
+            settings['speed'] = f"Unknown! ({ep.speed})"
+
+        if ep.duplex == self.DUPLEX_HALF:
+            settings['duplex'] = "Half"
+        elif ep.duplex == self.DUPLEX_FULL:
+            settings['duplex'] = "Full"
+        else:
+            settings['duplex'] = f"Unknown! ({ep.duplex})"
+
+        if ep.autoneg == self.AUTONEG_DISABLE:
+            settings['autoneg'] = False
+        else:
+            settings['autoneg'] = True
+
+        return settings

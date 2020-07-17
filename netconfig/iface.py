@@ -264,28 +264,28 @@ def _sockaddr_to_string(sockaddr):
 # ===============================================================
 
 
-def get_all():
-    ifr = ifreq()
-    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0) as skt:
-        ifaces = []
-        for i in range(1, 64):
-            ifr.data.ifr_ifindex = i
-            try:
-                fcntl.ioctl(skt, SIOCGIFNAME, ifr)
-            except OSError as exc:
-                if exc.errno == errno.ENODEV:
-                    break
-                else:
-                    raise
-            ifaces.append(ctypes.string_at(ifr.ifr_name).decode("utf-8"))
-    return ifaces
-
-
 class Iface:
     """A simplified linux network device configuration and control interface.
 
         It can be used in situations where pyroute2 is over-kill.
     """
+    @staticmethod
+    def get_all():
+        ifr = ifreq()
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0) as skt:
+            ifaces = []
+            for i in range(1, 64):
+                ifr.data.ifr_ifindex = i
+                try:
+                    fcntl.ioctl(skt, SIOCGIFNAME, ifr)
+                except OSError as exc:
+                    if exc.errno == errno.ENODEV:
+                        break
+                    else:
+                        raise
+                ifaces.append(ctypes.string_at(ifr.ifr_name).decode("utf-8"))
+        return ifaces
+
     def __init__(self, ifname):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._name = (ctypes.c_ubyte * IFNAMSIZ)(*bytearray(ifname.encode()))
