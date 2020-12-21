@@ -51,9 +51,11 @@ class AIPRoute():
                         f"Failed to add {device_id} to bridge {master_id}"
                 )
 
-    def _add_device(self, device_name: str, device_type: str) -> None:
+    def _add_device(
+            self, device_name: str, device_type: str, **kwargs
+    ) -> None:
         with IPRoute() as ipr:
-            ipr.link('add', ifname=device_name, kind=device_type)
+            ipr.link('add', ifname=device_name, kind=device_type, **kwargs)
 
     def _set_address(self, device_id: int, address: netaddr.IPNetwork) -> None:
         with IPRoute() as ipr:
@@ -76,6 +78,9 @@ class AIPRoute():
             ipr.link('set', index=device_id, state='up' if state else 'down')
 
     async def get_id(self, device_name: str) -> int:
+        if not device_name:
+            return 0
+
         return await self.loop.run_in_executor(
                 self.executor, partial(self._get_id, device_name)
         )
@@ -89,17 +94,28 @@ class AIPRoute():
         )
 
     async def delete_device(self, device_name: str) -> None:
+        if not device_name:
+            return
+
         await self.loop.run_in_executor(
                 self.executor, partial(self._delete_device, device_name)
         )
 
-    async def add_device(self, device_name: str, device_type: str) -> None:
+    async def add_device(
+            self, device_name: str, device_type: str, **kwargs
+    ) -> None:
+        if not device_name or device_type:
+            return
+
         await self.loop.run_in_executor(
                 self.executor,
-                partial(self._add_device, device_name, device_type)
+                partial(self._add_device, device_name, device_type, **kwargs)
         )
 
     async def set_master(self, device_id: int, master_id: int) -> None:
+        if device_id <= 0 or master_id <= 0:
+            return
+
         await self.loop.run_in_executor(
                 self.executor, partial(self._set_master, device_id, master_id)
         )
@@ -107,16 +123,25 @@ class AIPRoute():
     async def set_address(
             self, device_id: int, address: netaddr.IPNetwork
     ) -> None:
+        if device_id <= 0:
+            return
+
         await self.loop.run_in_executor(
                 self.executor, partial(self._set_address, device_id, address)
         )
 
     async def set_mtu(self, device_id: int, mtu: int) -> None:
+        if device_id <= 0 or mtu <= 0:
+            return
+
         await self.loop.run_in_executor(
                 self.executor, partial(self._set_mtu, device_id, mtu)
         )
 
     async def set_up(self, device_id: int, state: bool) -> None:
+        if device_id <= 0:
+            return
+
         await self.loop.run_in_executor(
                 self.executor, partial(self._set_up, device_id, state)
         )
