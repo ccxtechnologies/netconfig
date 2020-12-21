@@ -113,7 +113,7 @@ class AIPRoute():
         )
 
     async def set_master(self, device_id: int, master_id: int) -> None:
-        if device_id <= 0 or master_id <= 0:
+        if device_id <= 0 or master_id < 0:
             return
 
         await self.loop.run_in_executor(
