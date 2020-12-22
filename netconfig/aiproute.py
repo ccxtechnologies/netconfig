@@ -121,6 +121,24 @@ class AIPRoute():
             else:
                 raise RuntimeError(f"Failed to add route {kwargs}: {exc}")
 
+    async def _replace_tc(
+            self, kind: str, device_id: int, handle: int, **kwargs
+    ) -> None:
+        self.ipr.tc("replace", kind, device_id, handle, **kwargs)
+
+    async def _delete_tc(
+            self, kind: str, device_id: int, handle: int, **kwargs
+    ) -> None:
+        try:
+            self.ipr.tc("del", kind, device_id, handle, **kwargs)
+        except NetlinkError:
+            pass
+
+    async def _add_filter_tc(
+            self, kind: str, device_id: int, **kwargs
+    ) -> None:
+        self.ipr.tc("add-filter", kind, device_id, **kwargs)
+
     def _run_routine(self, routine):
         try:
             routine(self.ipr)
@@ -224,6 +242,32 @@ class AIPRoute():
     async def add_route(self, **kwargs) -> None:
         await self.loop.run_in_executor(
                 self.executor, partial(self._add_route, **kwargs)
+        )
+
+    async def replace_tc(
+            self,
+            kind: str,
+            device_id: int,
+            handle: int = None,
+            **kwargs
+    ) -> None:
+        await self.loop.run_in_executor(
+                self.executor,
+                partial(self._replace_tc, kind, device_id, handle, **kwargs)
+        )
+
+    async def delete_tc(
+            self, kind: str, device_id: int, handle: int, **kwargs
+    ) -> None:
+        await self.loop.run_in_executor(
+                self.executor,
+                partial(self._delete_tc, kind, device_id, handle, **kwargs)
+        )
+
+    async def add_filter_tc(self, kind: str, device_id: int, **kwargs) -> None:
+        await self.loop.run_in_executor(
+                self.executor,
+                partial(self._add_filter_tc, kind, device_id, **kwargs)
         )
 
     async def run_routine(self, routine):
