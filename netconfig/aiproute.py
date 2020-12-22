@@ -77,6 +77,27 @@ class AIPRoute():
         with IPRoute() as ipr:
             ipr.link('set', index=device_id, state='up' if state else 'down')
 
+    def _flush_rules(self, priority: int) -> None:
+        with IPRoute() as ipr:
+            try:
+                ipr.flush_rules(priority=priority)
+            except (OSError, NetlinkError):
+                pass
+
+    def _delete_rule(self, priority: int, **kwargs) -> None:
+        with IPRoute() as ipr:
+            try:
+                ipr.rule('delete', priority=priority, **kwargs)
+            except NetlinkError:
+                pass
+
+    def _add_rule(self, priority: int, **kwargs) -> None:
+        with IPRoute() as ipr:
+            try:
+                ipr.rule('add', priority=priority, **kwargs)
+            except NetlinkError:
+                raise RuntimeError(f"Failed to add rule {kwargs}")
+
     async def get_id(self, device_name: str) -> int:
         if not device_name:
             return 0
@@ -144,4 +165,19 @@ class AIPRoute():
 
         await self.loop.run_in_executor(
                 self.executor, partial(self._set_up, device_id, state)
+        )
+
+    async def flush_rules(self, priority: int) -> None:
+        await self.loop.run_in_executor(
+                self.executor, partial(self._flush_rules, priority)
+        )
+
+    async def delete_rule(self, priority: int, **kwargs) -> None:
+        await self.loop.run_in_executor(
+                self.executor, partial(self._delete_rule, priority, **kwargs)
+        )
+
+    async def add_rule(self, priority: int, **kwargs) -> None:
+        await self.loop.run_in_executor(
+                self.executor, partial(self._add_rule, priority, **kwargs)
         )
