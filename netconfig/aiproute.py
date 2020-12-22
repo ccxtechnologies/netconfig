@@ -146,12 +146,12 @@ class AIPRoute():
             else:
                 raise RuntimeError(f"Failed to add route {kwargs}: {exc}")
 
-    async def _replace_tc(
+    def _replace_tc(
             self, kind: str, device_id: int, handle: int, **kwargs
     ) -> None:
         self.ipr.tc("replace", kind, device_id, handle, **kwargs)
 
-    async def _delete_tc(
+    def _delete_tc(
             self, kind: str, device_id: int, handle: int, **kwargs
     ) -> None:
         try:
@@ -159,9 +159,7 @@ class AIPRoute():
         except NetlinkError:
             pass
 
-    async def _add_filter_tc(
-            self, kind: str, device_id: int, **kwargs
-    ) -> None:
+    def _add_filter_tc(self, kind: str, device_id: int, **kwargs) -> None:
         self.ipr.tc("add-filter", kind, device_id, **kwargs)
 
     def _run_routine(self, routine):
