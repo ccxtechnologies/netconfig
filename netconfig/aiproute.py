@@ -20,7 +20,15 @@ class AIPRoute():
             self.ipr.close()
 
     def _get_id(self, device_name: str) -> None:
-        device_ids = self.ipr.link_lookup(ifname=device_name)
+        try:
+            device_ids = self.ipr.link_lookup(ifname=device_name)
+
+        except OSError as exc:
+            # sometimes calling this will lose the link for some reason
+            if exc.errno == 9:
+                self.ipr.close()
+                self.ipr = IPRoute()
+                device_ids = self.ipr.link_lookup(ifname=device_name)
 
         try:
             return device_ids[0]
@@ -68,6 +76,23 @@ class AIPRoute():
                     address=str(address.ip),
                     mask=address.prefixlen
             )
+
+    def _set_mac(self, device_id: int, mac: netaddr.EUI) -> None:
+        if mac:
+            self.ipr.link('set', index=device_id, address=str(mac))
+
+    def _set_device_name(self, device_id: int, device_name: str) -> None:
+        if not device_name:
+            return
+
+        try:
+            self.ipr.link("set", index=device_id, ifname=device_name)
+        except NetlinkError as exc:
+            if exc.code == 16:
+                time.sleep(2)
+                self.ipr.link("set", index=device_id, ifname=device_name)
+            else:
+                raise
 
     def _set_mtu(self, device_id: int, mtu: int) -> None:
         self.ipr.link('set', index=device_id, mut=mtu)
@@ -204,6 +229,23 @@ class AIPRoute():
 
         await self.loop.run_in_executor(
                 self.executor, partial(self._set_mtu, device_id, mtu)
+        )
+
+    async def set_mac(self, device_id: int, mac: netaddr.EUI) -> None:
+        if device_id <= 0:
+            return
+
+        await self.loop.run_in_executor(
+                self.executor, partial(self._set_mac, device_id, mac)
+        )
+
+    async def set_device_name(self, device_id: int, device_name: str) -> None:
+        if device_id <= 0:
+            return
+
+        await self.loop.run_in_executor(
+                self.executor,
+                partial(self._set_device_name, device_id, device_name)
         )
 
     async def set_up(self, device_id: int, state: bool) -> None:
