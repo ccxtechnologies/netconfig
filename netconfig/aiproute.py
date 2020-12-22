@@ -3,6 +3,7 @@
 
 import asyncio
 import netaddr
+import time
 from pyroute2 import IPRoute
 from pyroute2.netlink.exceptions import NetlinkError
 from functools import partial
@@ -77,26 +78,66 @@ class AIPRoute():
         with IPRoute() as ipr:
             ipr.link('set', index=device_id, state='up' if state else 'down')
 
-    def _flush_rules(self, priority: int) -> None:
+    def _flush_rules(self, **kwargs) -> None:
         with IPRoute() as ipr:
             try:
-                ipr.flush_rules(priority=priority)
+                ipr.flush_rules(**kwargs)
             except (OSError, NetlinkError):
                 pass
 
-    def _delete_rule(self, priority: int, **kwargs) -> None:
+    def _delete_rule(self, **kwargs) -> None:
         with IPRoute() as ipr:
             try:
-                ipr.rule('delete', priority=priority, **kwargs)
+                ipr.rule('delete', **kwargs)
             except NetlinkError:
                 pass
 
-    def _add_rule(self, priority: int, **kwargs) -> None:
+    def _add_rule(self, **kwargs) -> None:
         with IPRoute() as ipr:
             try:
-                ipr.rule('add', priority=priority, **kwargs)
+                ipr.rule('add', **kwargs)
+            except NetlinkError as exc:
+                if exc.code == 17:
+                    pass
+                else:
+                    raise RuntimeError(f"Failed to add rule {kwargs}: {exc}")
+
+    def _flush_routes(self, **kwargs) -> None:
+        with IPRoute() as ipr:
+            try:
+                ipr.flush_routes(**kwargs)
+            except (OSError, NetlinkError):
+                pass
+
+    def _delete_route(self, **kwargs) -> None:
+        with IPRoute() as ipr:
+            try:
+                ipr.route('delete', **kwargs)
             except NetlinkError:
-                raise RuntimeError(f"Failed to add rule {kwargs}")
+                pass
+
+    def _add_route(self, **kwargs) -> None:
+        with IPRoute() as ipr:
+            try:
+                ipr.route('add', **kwargs)
+            except NetlinkError as exc:
+                if exc.code == 17:
+                    time.sleep(0.250)
+                    try:
+                        ipr.route('add', **kwargs)
+                    except NetlinkError as exc:
+                        raise RuntimeError(
+                                f"Failed to add route {kwargs}: {exc}"
+                        )
+                else:
+                    raise RuntimeError(f"Failed to add route {kwargs}: {exc}")
+
+    def _run_routine(self, routine):
+        with IPRoute() as ipr:
+            try:
+                routine(ipr)
+            except NetlinkError as exc:
+                raise RuntimeError(f"Netlink error in {routine}: {exc}")
 
     async def get_id(self, device_name: str) -> int:
         if not device_name:
@@ -167,17 +208,37 @@ class AIPRoute():
                 self.executor, partial(self._set_up, device_id, state)
         )
 
-    async def flush_rules(self, priority: int) -> None:
+    async def flush_rules(self, **kwargs) -> None:
         await self.loop.run_in_executor(
-                self.executor, partial(self._flush_rules, priority)
+                self.executor, partial(self._flush_rules, **kwargs)
         )
 
-    async def delete_rule(self, priority: int, **kwargs) -> None:
+    async def delete_rule(self, **kwargs) -> None:
         await self.loop.run_in_executor(
-                self.executor, partial(self._delete_rule, priority, **kwargs)
+                self.executor, partial(self._delete_rule, **kwargs)
         )
 
-    async def add_rule(self, priority: int, **kwargs) -> None:
+    async def add_rule(self, **kwargs) -> None:
         await self.loop.run_in_executor(
-                self.executor, partial(self._add_rule, priority, **kwargs)
+                self.executor, partial(self._add_rule, **kwargs)
+        )
+
+    async def flush_routes(self, **kwargs) -> None:
+        await self.loop.run_in_executor(
+                self.executor, partial(self._flush_routes, **kwargs)
+        )
+
+    async def delete_route(self, **kwargs) -> None:
+        await self.loop.run_in_executor(
+                self.executor, partial(self._delete_route, **kwargs)
+        )
+
+    async def add_route(self, **kwargs) -> None:
+        await self.loop.run_in_executor(
+                self.executor, partial(self._add_route, **kwargs)
+        )
+
+    async def run_routine(self, routine):
+        return await self.loop.run_in_executor(
+                self.executor, partial(self._run_routine, routine)
         )
