@@ -305,6 +305,11 @@ class Iface:
         fcntl.ioctl(self.sock, SIOCGIFFLAGS, ifr)
         return bool(ifr.data.ifr_flags & IFF_UP)
 
+    def get_up_and_lower_up(self):
+        ifr = self._ifreq()
+        fcntl.ioctl(self.sock, SIOCGIFFLAGS, ifr)
+        return bool(ifr.data.ifr_flags & (IFF_UP | IFF_LOWER_UP))
+
     def set_up(self, value):
         ifr = self._ifreq()
         fcntl.ioctl(self.sock, SIOCGIFFLAGS, ifr)
