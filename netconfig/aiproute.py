@@ -79,7 +79,10 @@ class AIPRoute():
 
     def _set_mac(self, device_id: int, mac: netaddr.EUI) -> None:
         if mac:
-            self.ipr.link('set', index=device_id, address=str(mac))
+            info = self.ipr.get_links(device_id)[0]
+            existing_mac = netaddr.EUI(info.get_attr("IFLA_ADDRESS"))
+            if existing_mac != mac:
+                self.ipr.link('set', index=device_id, address=str(mac))
 
     def _set_device_name(self, device_id: int, device_name: str) -> None:
         if not device_name:
