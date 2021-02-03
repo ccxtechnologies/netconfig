@@ -36,7 +36,10 @@ class AIPRoute():
             return 0
 
     def _get_name(self, device_id: int) -> str:
-        links = self.ipr.get_links(device_id)
+        try:
+            links = self.ipr.get_links(device_id)
+        except NetlinkError:
+            return None
         try:
             return links[0].get_attr('IFLA_IFNAME')
         except (IndexError, KeyError):
