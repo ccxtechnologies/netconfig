@@ -101,7 +101,7 @@ class AIPRoute():
                 raise
 
     def _set_mtu(self, device_id: int, mtu: int) -> None:
-        self.ipr.link('set', index=device_id, mut=mtu)
+        self.ipr.link('set', index=device_id, mtu=mtu)
 
     def _set_up(self, device_id: int, state: bool) -> None:
         self.ipr.link('set', index=device_id, state='up' if state else 'down')
