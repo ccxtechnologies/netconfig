@@ -67,7 +67,17 @@ class AIPRoute():
     def _add_device(
             self, device_name: str, device_type: str, **kwargs
     ) -> None:
-        self.ipr.link('add', ifname=device_name, kind=device_type, **kwargs)
+        try:
+            self.ipr.link(
+                    'add', ifname=device_name, kind=device_type, **kwargs
+            )
+        except NetlinkError as exc:
+            if exc.code == 17:
+                raise FileExistsError(
+                        f"Device {device_name} already exists"
+                ) from exc
+            else:
+                raise
 
     def _set_address(self, device_id: int, address: netaddr.IPNetwork) -> None:
         self.ipr.flush_addr(index=device_id)
