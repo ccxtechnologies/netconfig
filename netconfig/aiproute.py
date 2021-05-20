@@ -9,6 +9,11 @@ from pyroute2 import IPLinkRequest
 from pyroute2.netlink.exceptions import NetlinkError
 from functools import partial
 
+# =================== from linux headers ========================
+
+IFF_UP = (1 << 0)
+IFF_LOWER_UP = (1 << 16)
+
 
 class AIPRoute():
     def __init__(self, loop=None, executor=None):
@@ -41,10 +46,24 @@ class AIPRoute():
             links = self.ipr.get_links(device_id)
         except NetlinkError:
             return None
+
         try:
             return links[0].get_attr('IFLA_IFNAME')
         except (IndexError, KeyError):
             return None
+
+    def _get_up(self, device_id: int) -> str:
+        try:
+            links = self.ipr.get_links(device_id)
+        except NetlinkError:
+            return False
+
+        try:
+            ifi_flags = links[0]['flags']
+        except (IndexError, KeyError):
+            return False
+
+        return (ifi_flags & (IFF_UP | IFF_LOWER_UP)) == (IFF_UP | IFF_LOWER_UP)
 
     def _delete_device(self, device_name: str) -> None:
         try:
@@ -215,6 +234,14 @@ class AIPRoute():
 
         return await self.loop.run_in_executor(
                 self.executor, partial(self._get_name, device_id)
+        )
+
+    async def get_up(self, device_id: int) -> str:
+        if device_id <= 0:
+            return None
+
+        return await self.loop.run_in_executor(
+                self.executor, partial(self._get_up, device_id)
         )
 
     async def delete_device(self, device_name: str) -> None:
