@@ -5,6 +5,7 @@ import asyncio
 import netaddr
 import time
 from pyroute2 import IPRoute
+from pyroute2 import IPLinkRequest
 from pyroute2.netlink.exceptions import NetlinkError
 from functools import partial
 
@@ -63,6 +64,22 @@ class AIPRoute():
             raise RuntimeError(
                     f"Failed to add {device_id} to bridge {master_id}"
             )
+
+    def _set_stp(self, device_id: int, stp: int) -> None:
+        try:
+            self.ipr.link(
+                    'set',
+                    **IPLinkRequest(
+                            {
+                                    'index': device_id,
+                                    'kind': 'bridge',
+                                    'br_stp_state': stp
+                            }
+                    )
+            )
+
+        except (OSError, NetlinkError):
+            raise RuntimeError(f"Failed to set {device_id} stp to {stp}")
 
     def _add_device(
             self, device_name: str, device_type: str, **kwargs
@@ -225,6 +242,15 @@ class AIPRoute():
 
         await self.loop.run_in_executor(
                 self.executor, partial(self._set_master, device_id, master_id)
+        )
+
+    async def set_stp(self, device_id: int, stp: bool) -> None:
+        if device_id <= 0:
+            return
+
+        await self.loop.run_in_executor(
+                self.executor,
+                partial(self._set_stp, device_id, 1 if stp else 0)
         )
 
     async def set_address(
