@@ -82,6 +82,7 @@ class AIPRoute():
                     mac = value
             if mac and address:
                 cache[mac] = address
+
         return cache
 
     def _delete_device(self, device_name: str) -> None:
