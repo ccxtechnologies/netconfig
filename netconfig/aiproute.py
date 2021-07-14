@@ -65,6 +65,25 @@ class AIPRoute():
 
         return (ifi_flags & (IFF_UP | IFF_LOWER_UP)) == (IFF_UP | IFF_LOWER_UP)
 
+    def _get_arp_cache(self, device_id: int) -> list:
+        try:
+            response = self.ipr.get_neighbours(ifindex=device_id)
+        except NetlinkError:
+            return False
+
+        cache = {}
+        for r in response:
+            mac = None
+            address = None
+            for name, value in r['attrs']:
+                if name == "NDA_DST":
+                    address = value
+                elif name == "NDA_LLADDR":
+                    mac = value
+            if mac and address:
+                cache[mac] = address
+        return cache
+
     def _delete_device(self, device_name: str) -> None:
         try:
             self.ipr.link('del', ifname=device_name)
@@ -321,6 +340,14 @@ class AIPRoute():
 
         await self.loop.run_in_executor(
                 self.executor, partial(self._set_up, device_id, state)
+        )
+
+    async def get_arp_cache(self, device_id: int) -> list:
+        if device_id <= 0:
+            return
+
+        return await self.loop.run_in_executor(
+                self.executor, partial(self._get_arp_cache, device_id)
         )
 
     async def flush_rules(self, **kwargs) -> None:
