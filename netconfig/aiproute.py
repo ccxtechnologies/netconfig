@@ -214,6 +214,11 @@ class AIPRoute():
                 try:
                     self.ipr.route('add', **kwargs)
                 except NetlinkError as exc:
+                    if exc.code == 17:
+                        raise FileExistsError(
+                                f"Route {kwargs} already exists"
+                        ) from exc
+
                     raise RuntimeError(f"Failed to add route {kwargs}: {exc}")
             else:
                 raise RuntimeError(f"Failed to add route {kwargs}: {exc}")
