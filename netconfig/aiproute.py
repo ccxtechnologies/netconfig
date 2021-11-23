@@ -25,7 +25,7 @@ class AIPRoute():
         if not self.ipr.closed:
             self.ipr.close()
 
-    def _get_id(self, device_name: str) -> None:
+    def _get_id(self, device_name: str) -> int:
         try:
             device_ids = self.ipr.link_lookup(ifname=device_name)
 
@@ -52,7 +52,7 @@ class AIPRoute():
         except (IndexError, KeyError):
             return None
 
-    def _get_up(self, device_id: int) -> str:
+    def _get_up(self, device_id: int) -> bool:
         try:
             links = self.ipr.get_links(device_id)
         except NetlinkError:
