@@ -65,11 +65,11 @@ class AIPRoute():
 
         return (ifi_flags & (IFF_UP | IFF_LOWER_UP)) == (IFF_UP | IFF_LOWER_UP)
 
-    def _get_arp_cache(self, device_id: int) -> list:
+    def _get_arp_cache(self, device_id: int) -> dict:
         try:
             response = self.ipr.get_neighbours(ifindex=device_id)
         except NetlinkError:
-            return False
+            return {}
 
         cache = {}
         for r in response:
@@ -213,8 +213,8 @@ class AIPRoute():
                 time.sleep(0.250)
                 try:
                     self.ipr.route('add', **kwargs)
-                except NetlinkError as exc:
-                    raise RuntimeError(f"Failed to add route {kwargs}: {exc}")
+                except NetlinkError as exce:
+                    raise RuntimeError(f"Failed to add route {kwargs}: {exce}")
             else:
                 raise RuntimeError(f"Failed to add route {kwargs}: {exc}")
 
@@ -343,9 +343,9 @@ class AIPRoute():
                 self.executor, partial(self._set_up, device_id, state)
         )
 
-    async def get_arp_cache(self, device_id: int) -> list:
+    async def get_arp_cache(self, device_id: int) -> dict:
         if device_id <= 0:
-            return
+            return {}
 
         return await self.loop.run_in_executor(
                 self.executor, partial(self._get_arp_cache, device_id)
