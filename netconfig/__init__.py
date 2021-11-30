@@ -1,5 +1,7 @@
 # == Copyright: 2017-2020, CCX Technologies
 
+# flake8: noqa
+
 from .__version__ import __version__
 
 from .ethtool import EthTool
