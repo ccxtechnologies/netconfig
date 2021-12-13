@@ -281,3 +281,6 @@ class WGRoute:
                         fwmark, private_key
                 )
         )
+
+    def close(self):
+        self.wg.close()
