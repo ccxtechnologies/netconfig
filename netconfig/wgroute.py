@@ -3,8 +3,10 @@
 
 import struct
 import base64
+import asyncio
 from socket import AF_INET, AF_INET6
 from socket import inet_ntop
+from functools import partial
 
 from pyroute2.netlink import NLM_F_REQUEST, NLM_F_DUMP, NLM_F_ACK
 from pyroute2.netlink import nla, nla_base
@@ -238,3 +240,44 @@ class WGNetlinkSocket(GenericNetlinkSocket):
             )
 
         return self.put(msg, msg_type=self.prid, msg_flags=NLM_F_REQUEST)
+
+
+class WGRoute:
+    def __init__(self, loop=None, executor=None):
+        self.loop = asyncio.get_event_loop() if loop is None else loop
+        self.executor = executor
+        self.wg = WGNetlinkSocket()
+
+    async def get_device_dump(self, ifname=None, ifindex=None):
+        return await self.loop.run_in_executor(
+                self.executor,
+                partial(self.wg.get_device_dump, ifname, ifindex)
+        )
+
+    async def get_peer_stats(self, ifname=None, ifindex=None):
+        return await self.loop.run_in_executor(
+                self.executor,
+                partial(self.wg.get_peer_stats, ifname, ifindex)
+        )
+
+    async def get_device_dict(self, ifname=None, ifindex=None):
+        return await self.loop.run_in_executor(
+                self.executor,
+                partial(self.wg.get_device_dict, ifname, ifindex)
+        )
+
+    async def set_device(
+            self,
+            ifname=None,
+            ifindex=None,
+            listen_port=None,
+            fwmark=None,
+            private_key=None
+    ):
+        return await self.loop.run_in_executor(
+                self.executor,
+                partial(
+                        self.wg.set_device, ifname, ifindex, listen_port,
+                        fwmark, private_key
+                )
+        )
