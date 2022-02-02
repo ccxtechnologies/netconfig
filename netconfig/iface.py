@@ -269,6 +269,7 @@ class Iface:
 
         It can be used in situations where pyroute2 is over-kill.
     """
+
     @staticmethod
     def get_all():
         ifr = ifreq()
