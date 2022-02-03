@@ -95,6 +95,13 @@ class AIPRoute():
                 pass
             else:
                 raise
+        else:
+            for _ in range(0, 10):
+                _id = self._get_id(device_name)
+                if not _id:
+                    break
+            else:
+                raise RuntimeError(f"Failed to remove {device_name}")
 
     def _set_master(self, device_id: int, master_id: int) -> None:
         try:
@@ -135,6 +142,15 @@ class AIPRoute():
                 ) from exc
             else:
                 raise
+
+        for _ in range(0, 10):
+            _id = self._get_id(device_name)
+            if _id:
+                break
+        else:
+            raise RuntimeError(f"Failed to add {device_name}")
+
+        return _id
 
     def _set_address(self, device_id: int, address: netaddr.IPNetwork) -> None:
         self.ipr.flush_addr(index=device_id)
@@ -280,11 +296,11 @@ class AIPRoute():
 
     async def add_device(
             self, device_name: str, device_type: str, **kwargs
-    ) -> None:
+    ) -> int:
         if not device_name or not device_type:
             return
 
-        await self.loop.run_in_executor(
+        return await self.loop.run_in_executor(
                 self.executor,
                 partial(self._add_device, device_name, device_type, **kwargs)
         )
