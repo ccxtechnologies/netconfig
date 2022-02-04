@@ -14,9 +14,9 @@ async def _get_rt_value(name: str, rt_file: str) -> int:
     raise RuntimeError(f"Unable to find {name} in {rt_file}")
 
 
-async def get_rt_protocol_id(name: str) -> int:
+async def get_rt_table_id(name: str) -> int:
     return await _get_rt_value(name, 'rt_tables')
 
 
-async def get_rt_table_id(name: str) -> int:
+async def get_rt_protocol_id(name: str) -> int:
     return await _get_rt_value(name, 'rt_protos')
