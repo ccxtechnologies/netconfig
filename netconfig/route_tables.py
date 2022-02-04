@@ -11,7 +11,7 @@ async def _get_rt_value(name: str, rt_file: str) -> int:
             label = line.split(' ', 1)[-1].strip()
             if label == name:
                 return int(line.split()[0])
-    raise RuntimeError(f"Unable to fine {name} in {rt_file}")
+    raise RuntimeError(f"Unable to find {name} in {rt_file}")
 
 
 async def get_rt_protocol_id(name: str) -> int:
