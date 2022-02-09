@@ -187,7 +187,18 @@ class AIPRoute():
         self.ipr.link('set', index=device_id, mtu=mtu)
 
     def _set_up(self, device_id: int, state: bool) -> None:
-        self.ipr.link('set', index=device_id, state='up' if state else 'down')
+        if state:
+            self.ipr.link('set', index=device_id, state='up')
+        else:
+            try:
+                self.ipr.link('set', index=device_id, state='down')
+
+            except NetlinkError as exc:
+                if exc.code == 19:
+                    # if device doesn't exist ignore
+                    pass
+                else:
+                    raise
 
     def _flush_rules(self, **kwargs) -> None:
         try:
