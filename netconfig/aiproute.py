@@ -26,7 +26,7 @@ class AIPRoute():
         if not self.ipr.closed:
             self.ipr.close()
 
-    def _get_id(self, device_name: str) -> None:
+    def _get_id(self, device_name: str) -> int:
         try:
             device_ids = self.ipr.link_lookup(ifname=device_name)
 
@@ -53,7 +53,7 @@ class AIPRoute():
         except (IndexError, KeyError):
             return None
 
-    def _get_up(self, device_id: int) -> str:
+    def _get_up(self, device_id: int) -> bool:
         try:
             links = self.ipr.get_links(device_id)
         except NetlinkError:
@@ -66,7 +66,7 @@ class AIPRoute():
 
         return (ifi_flags & (IFF_UP | IFF_LOWER_UP)) == (IFF_UP | IFF_LOWER_UP)
 
-    def _get_arp_cache(self, device_id: int) -> list:
+    def _get_arp_cache(self, device_id: int) -> dict:
         try:
             response = self.ipr.get_neighbours(ifindex=device_id)
         except NetlinkError:
@@ -241,13 +241,13 @@ class AIPRoute():
                 time.sleep(0.250)
                 try:
                     self.ipr.route('add', **kwargs)
-                except NetlinkError as exc:
-                    if exc.code == 17:
+                except NetlinkError as exce:
+                    if exce.code == 17:
                         raise FileExistsError(
                                 f"Route {kwargs} already exists"
-                        ) from exc
+                        ) from exce
 
-                    raise RuntimeError(f"Failed to add route {kwargs}: {exc}")
+                    raise RuntimeError(f"Failed to add route {kwargs}: {exce}")
             else:
                 raise RuntimeError(f"Failed to add route {kwargs}: {exc}")
 
@@ -376,9 +376,9 @@ class AIPRoute():
                 self.executor, partial(self._set_up, device_id, state)
         )
 
-    async def get_arp_cache(self, device_id: int) -> list:
+    async def get_arp_cache(self, device_id: int) -> dict:
         if device_id <= 0:
-            return
+            return None
 
         return await self.loop.run_in_executor(
                 self.executor, partial(self._get_arp_cache, device_id)
