@@ -273,6 +273,40 @@ class AIPRoute():
         except NetlinkError as exc:
             raise RuntimeError(f"Netlink error in {routine}: {exc}")
 
+    def get_attr(self, attr_name: str, attrs) -> object:
+        if attrs is None:
+            return None
+
+        def _nested_values(attr_name, _attrs):
+            values = []
+
+            if isinstance(_attrs, list):
+                for _attr in _attrs:
+                    value = _nested_values(attr_name, _attr)
+                    if value:
+                        values.append(value)
+
+            else:
+                for name, value in _attrs['attrs']:
+                    if name == attr_name:
+                        values.append(value)
+
+            if not values:
+                return None
+            elif len(values) == 1:
+                return values[0]
+            else:
+                return values
+
+        return _nested_values(attr_name, attrs)
+
+    def get_nested(self, attr_names: tuple, attrs: dict) -> object:
+        _attrs = attrs
+
+        for attr_name in attr_names:
+            _attrs = self.get_attr(attr_name, _attrs)
+        return _attrs
+
     async def get_id(self, device_name: str) -> int:
         if not device_name:
             return 0

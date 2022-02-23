@@ -27,10 +27,8 @@ class IWRoute:
         msg['attrs'] = [
                 ['NL80211_ATTR_WIPHY', phy_id],
                 ['NL80211_ATTR_WIPHY_TX_POWER_SETTING', 1],
-        ]
-        msg['attrs'].append(
                 ['NL80211_ATTR_WIPHY_TX_POWER_LEVEL', 100 * tx_power_dbm]
-        )
+        ]
 
         self.iw.nlm_request(
                 msg,
@@ -79,6 +77,28 @@ class IWRoute:
             raise RuntimeError(f"Failed to add {device_name}")
 
         return _id
+
+    def _get_phy_info(self, phy_id: int):
+        msg = nl80211cmd()
+        msg['cmd'] = NL80211_NAMES['NL80211_CMD_GET_WIPHY']
+        msg['attrs'] = [['NL80211_ATTR_WIPHY', phy_id]]
+
+        try:
+            return self.iw.nlm_request(
+                    msg,
+                    msg_type=self.iw.prid,
+                    msg_flags=NLM_F_REQUEST | NLM_F_ACK
+            )[0]
+        except IndexError:
+            return None
+
+    async def get_phy_info(self, phy_id: int) -> dict:
+        if phy_id < 0:
+            return None
+
+        return await self.loop.run_in_executor(
+                self.executor, partial(self._get_phy_info, phy_id)
+        )
 
     async def get_phy_device_ids(self, phy_id: int) -> list:
         if phy_id < 0:
