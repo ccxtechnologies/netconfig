@@ -37,6 +37,28 @@ class IWRoute:
                 msg_flags=NLM_F_REQUEST | NLM_F_ACK
         )
 
+    def _get_phy_device_ids(self, phy_id):
+        return [
+                intf.get_attr('NL80211_ATTR_IFINDEX')
+                for intf in self.iw.get_interface_by_phy(phy_id)
+        ]
+
+    async def get_phy_device_ids(self, phy_id: int) -> list:
+        if phy_id < 0:
+            return None
+
+        return await self.loop.run_in_executor(
+                self.executor, partial(self._get_phy_device_ids, phy_id)
+        )
+
+    async def delete_device(self, device_id: int) -> None:
+        if device_id <= 0:
+            return
+
+        await self.loop.run_in_executor(
+                self.executor, partial(self.iw.del_interface, device_id)
+        )
+
     async def set_tx_power_limit(self, phy_id: int, tx_power_dbm: int) -> None:
         if phy_id < 0:
             return
