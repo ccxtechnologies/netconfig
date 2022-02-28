@@ -1,9 +1,10 @@
 #!/usr/bin/python
-# Copyright: 2017, CCX Technologies
+# Copyright: 2017-2022, CCX Technologies
 
 import socket
 import struct
 import asyncio
+import syslog
 
 # == from linux headers
 
@@ -58,7 +59,18 @@ async def monitor_state_change(queues):
             if type(loop) == asyncio.unix_events._UnixSelectorEventLoop:
                 data = await reader.read(65535)
             else:
-                data = await loop.sock_recv(skt, 65535)
+                try:
+                    data = await loop.sock_recv(skt, 65535)
+                except OSError as exc:
+                    if exc.errno == 105:
+                        syslog.syslog(
+                                "netconfig: No buffer space available,"
+                                " will retry"
+                        )
+                        await asyncio.sleep(1.34)
+                        continue
+                    else:
+                        raise
 
             msg_len, msg_type, flags, _, _ = struct.unpack("=LHHLL", data[:16])
 
