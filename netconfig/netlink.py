@@ -51,6 +51,8 @@ async def monitor_state_change(queues):
             await loop._create_connection_transport(
                     skt, lambda: protocol, None, ''
             )
+        else:
+            buffer = bytearray(65535)
 
         while True:
             # NOTE: There is a bug in the stock asyncio library and this
@@ -59,18 +61,8 @@ async def monitor_state_change(queues):
             if type(loop) == asyncio.unix_events._UnixSelectorEventLoop:
                 data = await reader.read(65535)
             else:
-                try:
-                    data = await loop.sock_recv(skt, 65535)
-                except OSError as exc:
-                    if exc.errno == 105:
-                        syslog.syslog(
-                                "netconfig: No buffer space available,"
-                                " will retry"
-                        )
-                        await asyncio.sleep(1.34)
-                        continue
-                    else:
-                        raise
+                await loop.sock_recv_into(skt, memoryview(buffer))
+                data = buffer
 
             msg_len, msg_type, flags, _, _ = struct.unpack("=LHHLL", data[:16])
 
