@@ -6,6 +6,9 @@ import struct
 import asyncio
 import syslog
 
+BUFFER_SIZE = 1048576
+READ_SIZE = 65535
+
 # == from linux headers
 
 RTMGRP_LINK = 1
@@ -39,6 +42,7 @@ async def monitor_state_change(queues):
 
         skt.setblocking(0)
         skt.bind((0, RTMGRP_LINK))
+        skt.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, BUFFER_SIZE)
 
         # I would like to use something like asyncio.open_connection but
         # it doesn't understand socket.AF_NETLINK / socket.SOCK_RAW so have to
@@ -51,18 +55,15 @@ async def monitor_state_change(queues):
             await loop._create_connection_transport(
                     skt, lambda: protocol, None, ''
             )
-        else:
-            buffer = bytearray(65535)
 
         while True:
             # NOTE: There is a bug in the stock asyncio library and this
             # will this will only work with uvloop, refer to an older
             # version based on loop._create_connection_transport
             if type(loop) == asyncio.unix_events._UnixSelectorEventLoop:
-                data = await reader.read(65535)
+                data = await reader.read(READ_SIZE)
             else:
-                await loop.sock_recv_into(skt, memoryview(buffer))
-                data = buffer
+                data = await loop.sock_recv(skt, READ_SIZE)
 
             msg_len, msg_type, flags, _, _ = struct.unpack("=LHHLL", data[:16])
 
