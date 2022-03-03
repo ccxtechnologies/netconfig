@@ -21,6 +21,7 @@ class AIPRoute():
         self.loop = asyncio.get_event_loop() if loop is None else loop
         self.executor = executor
         self.ipr = IPRoute()
+        self.lock = asyncio.Lock()
 
     def close(self):
         if not self.ipr.closed:
@@ -311,33 +312,37 @@ class AIPRoute():
         if not device_name:
             return 0
 
-        return await self.loop.run_in_executor(
-                self.executor, partial(self._get_id, device_name)
-        )
+        async with self.lock:
+            return await self.loop.run_in_executor(
+                    self.executor, partial(self._get_id, device_name)
+            )
 
     async def get_name(self, device_id: int) -> str:
         if device_id <= 0:
             return None
 
-        return await self.loop.run_in_executor(
-                self.executor, partial(self._get_name, device_id)
-        )
+        async with self.lock:
+            return await self.loop.run_in_executor(
+                    self.executor, partial(self._get_name, device_id)
+            )
 
     async def get_up(self, device_id: int) -> str:
         if device_id <= 0:
             return None
 
-        return await self.loop.run_in_executor(
-                self.executor, partial(self._get_up, device_id)
-        )
+        async with self.lock:
+            return await self.loop.run_in_executor(
+                    self.executor, partial(self._get_up, device_id)
+            )
 
     async def delete_device(self, device_name: str) -> None:
         if not device_name:
             return
 
-        await self.loop.run_in_executor(
-                self.executor, partial(self._delete_device, device_name)
-        )
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor, partial(self._delete_device, device_name)
+            )
 
     async def add_device(
             self, device_name: str, device_type: str, **kwargs
@@ -345,27 +350,34 @@ class AIPRoute():
         if not device_name or not device_type:
             return
 
-        return await self.loop.run_in_executor(
-                self.executor,
-                partial(self._add_device, device_name, device_type, **kwargs)
-        )
+        async with self.lock:
+            return await self.loop.run_in_executor(
+                    self.executor,
+                    partial(
+                            self._add_device, device_name, device_type,
+                            **kwargs
+                    )
+            )
 
     async def set_master(self, device_id: int, master_id: int) -> None:
         if device_id <= 0 or master_id < 0:
             return
 
-        await self.loop.run_in_executor(
-                self.executor, partial(self._set_master, device_id, master_id)
-        )
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor,
+                    partial(self._set_master, device_id, master_id)
+            )
 
     async def set_stp(self, device_id: int, stp: bool) -> None:
         if device_id <= 0:
             return
 
-        await self.loop.run_in_executor(
-                self.executor,
-                partial(self._set_stp, device_id, 1 if stp else 0)
-        )
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor,
+                    partial(self._set_stp, device_id, 1 if stp else 0)
+            )
 
     async def set_address(
             self, device_id: int, address: netaddr.IPNetwork
@@ -373,80 +385,93 @@ class AIPRoute():
         if device_id <= 0:
             return
 
-        await self.loop.run_in_executor(
-                self.executor, partial(self._set_address, device_id, address)
-        )
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor,
+                    partial(self._set_address, device_id, address)
+            )
 
     async def set_mtu(self, device_id: int, mtu: int) -> None:
         if device_id <= 0 or mtu <= 0:
             return
 
-        await self.loop.run_in_executor(
-                self.executor, partial(self._set_mtu, device_id, mtu)
-        )
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor, partial(self._set_mtu, device_id, mtu)
+            )
 
     async def set_mac(self, device_id: int, mac: netaddr.EUI) -> None:
         if device_id <= 0:
             return
 
-        await self.loop.run_in_executor(
-                self.executor, partial(self._set_mac, device_id, mac)
-        )
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor, partial(self._set_mac, device_id, mac)
+            )
 
     async def set_device_name(self, device_id: int, device_name: str) -> None:
         if device_id <= 0:
             return
 
-        await self.loop.run_in_executor(
-                self.executor,
-                partial(self._set_device_name, device_id, device_name)
-        )
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor,
+                    partial(self._set_device_name, device_id, device_name)
+            )
 
     async def set_up(self, device_id: int, state: bool) -> None:
         if device_id <= 0:
             return
 
-        await self.loop.run_in_executor(
-                self.executor, partial(self._set_up, device_id, state)
-        )
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor, partial(self._set_up, device_id, state)
+            )
 
     async def get_arp_cache(self, device_id: int) -> dict:
         if device_id <= 0:
             return None
 
-        return await self.loop.run_in_executor(
-                self.executor, partial(self._get_arp_cache, device_id)
-        )
+        async with self.lock:
+            return await self.loop.run_in_executor(
+                    self.executor, partial(self._get_arp_cache, device_id)
+            )
 
     async def flush_rules(self, **kwargs) -> None:
-        await self.loop.run_in_executor(
-                self.executor, partial(self._flush_rules, **kwargs)
-        )
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor, partial(self._flush_rules, **kwargs)
+            )
 
     async def delete_rule(self, **kwargs) -> None:
-        await self.loop.run_in_executor(
-                self.executor, partial(self._delete_rule, **kwargs)
-        )
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor, partial(self._delete_rule, **kwargs)
+            )
 
     async def add_rule(self, **kwargs) -> None:
-        await self.loop.run_in_executor(
-                self.executor, partial(self._add_rule, **kwargs)
-        )
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor, partial(self._add_rule, **kwargs)
+            )
 
     async def flush_routes(self, **kwargs) -> None:
-        await self.loop.run_in_executor(
-                self.executor, partial(self._flush_routes, **kwargs)
-        )
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor, partial(self._flush_routes, **kwargs)
+            )
 
     async def delete_route(self, **kwargs) -> None:
-        await self.loop.run_in_executor(
-                self.executor, partial(self._delete_route, **kwargs)
-        )
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor, partial(self._delete_route, **kwargs)
+            )
 
     async def add_route(self, **kwargs) -> None:
-        await self.loop.run_in_executor(
-                self.executor, partial(self._add_route, **kwargs)
-        )
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor, partial(self._add_route, **kwargs)
+            )
 
     async def replace_tc(
             self,
@@ -455,26 +480,34 @@ class AIPRoute():
             handle: int = None,
             **kwargs
     ) -> None:
-        await self.loop.run_in_executor(
-                self.executor,
-                partial(self._replace_tc, kind, device_id, handle, **kwargs)
-        )
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor,
+                    partial(
+                            self._replace_tc, kind, device_id, handle, **kwargs
+                    )
+            )
 
     async def delete_tc(
             self, kind: str, device_id: int, handle: int, **kwargs
     ) -> None:
-        await self.loop.run_in_executor(
-                self.executor,
-                partial(self._delete_tc, kind, device_id, handle, **kwargs)
-        )
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor,
+                    partial(
+                            self._delete_tc, kind, device_id, handle, **kwargs
+                    )
+            )
 
     async def add_filter_tc(self, kind: str, device_id: int, **kwargs) -> None:
-        await self.loop.run_in_executor(
-                self.executor,
-                partial(self._add_filter_tc, kind, device_id, **kwargs)
-        )
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor,
+                    partial(self._add_filter_tc, kind, device_id, **kwargs)
+            )
 
     async def run_routine(self, routine):
-        return await self.loop.run_in_executor(
-                self.executor, partial(self._run_routine, routine)
-        )
+        async with self.lock:
+            return await self.loop.run_in_executor(
+                    self.executor, partial(self._run_routine, routine)
+            )

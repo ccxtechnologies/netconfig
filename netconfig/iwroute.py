@@ -19,6 +19,7 @@ class IWRoute:
         self.loop = asyncio.get_event_loop() if loop is None else loop
         self.executor = executor
         self.iw = IW()
+        self.lock = asyncio.Lock()
 
     def _set_tx_power_limit(self, phy_id, tx_power_dbm):
 
@@ -96,25 +97,28 @@ class IWRoute:
         if phy_id < 0:
             return None
 
-        return await self.loop.run_in_executor(
-                self.executor, partial(self._get_phy_info, phy_id)
-        )
+        async with self.lock:
+            return await self.loop.run_in_executor(
+                    self.executor, partial(self._get_phy_info, phy_id)
+            )
 
     async def get_phy_device_ids(self, phy_id: int) -> list:
         if phy_id < 0:
             return None
 
-        return await self.loop.run_in_executor(
-                self.executor, partial(self._get_phy_device_ids, phy_id)
-        )
+        async with self.lock:
+            return await self.loop.run_in_executor(
+                    self.executor, partial(self._get_phy_device_ids, phy_id)
+            )
 
     async def get_id(self, phy_id: int, device_name: str) -> int:
         if phy_id < 0 or not device_name:
             return None
 
-        return await self.loop.run_in_executor(
-                self.executor, partial(self._get_id, phy_id, device_name)
-        )
+        async with self.lock:
+            return await self.loop.run_in_executor(
+                    self.executor, partial(self._get_id, phy_id, device_name)
+            )
 
     async def add_device(
             self, phy_id: int, device_name: str, device_type
@@ -137,27 +141,32 @@ class IWRoute:
         if not device_name or not device_type:
             return
 
-        return await self.loop.run_in_executor(
-                self.executor,
-                partial(self._add_device, phy_id, device_name, device_type)
-        )
+        async with self.lock:
+            return await self.loop.run_in_executor(
+                    self.executor,
+                    partial(
+                            self._add_device, phy_id, device_name, device_type
+                    )
+            )
 
     async def delete_device(self, device_id: int) -> None:
         if device_id <= 0:
             return
 
-        await self.loop.run_in_executor(
-                self.executor, partial(self.iw.del_interface, device_id)
-        )
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor, partial(self.iw.del_interface, device_id)
+            )
 
     async def set_tx_power_limit(self, phy_id: int, tx_power_dbm: int) -> None:
         if phy_id < 0:
             return
 
-        await self.loop.run_in_executor(
-                self.executor,
-                partial(self._set_tx_power_limit, phy_id, tx_power_dbm)
-        )
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor,
+                    partial(self._set_tx_power_limit, phy_id, tx_power_dbm)
+            )
 
     def close(self):
         self.iw.close()

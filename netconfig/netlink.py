@@ -4,7 +4,6 @@
 import socket
 import struct
 import asyncio
-import syslog
 
 BUFFER_SIZE = 1048576
 READ_SIZE = 65535
