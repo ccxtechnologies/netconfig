@@ -54,7 +54,7 @@ class WGRoute:
         def _nested_values(attr_name, _attrs):
             values = []
 
-            if isinstance(_attrs, list):
+            if isinstance(_attrs, list) or isinstance(_attrs, tuple):
                 for _attr in _attrs:
                     value = _nested_values(attr_name, _attr)
                     if value:
