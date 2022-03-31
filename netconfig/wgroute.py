@@ -47,5 +47,39 @@ class WGRoute:
                     self.executor, partial(self._info, ifname, ifindex)
             )
 
+    def get_attr(self, attr_name: str, attrs) -> object:
+        if attrs is None:
+            return None
+
+        def _nested_values(attr_name, _attrs):
+            values = []
+
+            if isinstance(_attrs, list):
+                for _attr in _attrs:
+                    value = _nested_values(attr_name, _attr)
+                    if value:
+                        values.append(value)
+
+            else:
+                for name, value in _attrs['attrs']:
+                    if name == attr_name:
+                        values.append(value)
+
+            if not values:
+                return None
+            elif len(values) == 1:
+                return values[0]
+            else:
+                return values
+
+        return _nested_values(attr_name, attrs)
+
+    def get_nested(self, attr_names: tuple, attrs: dict) -> object:
+        _attrs = attrs
+
+        for attr_name in attr_names:
+            _attrs = self.get_attr(attr_name, _attrs)
+        return _attrs
+
     def close(self):
         self.wg.close()
