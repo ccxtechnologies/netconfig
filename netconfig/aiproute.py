@@ -153,6 +153,9 @@ class AIPRoute():
 
         return _id
 
+    def _flush_address(self, device_id) -> None:
+        self.ipr.flush_addr(index=device_id)
+
     def _set_address(self, device_id: int, address: netaddr.IPNetwork) -> None:
         self.ipr.flush_addr(index=device_id)
 
@@ -162,6 +165,26 @@ class AIPRoute():
                     index=device_id,
                     address=str(address.ip),
                     mask=address.prefixlen
+            )
+
+    def _replace_address(
+            self, device_id: int, old_address: netaddr.IPNetwork,
+            new_address: netaddr.IPNetwork
+    ) -> None:
+        if bool(old_address.ip) and bool(old_address.prefixlen):
+            self.ipr.addr(
+                    'del',
+                    index=device_id,
+                    address=str(old_address.ip),
+                    mask=old_address.prefixlen
+            )
+
+        if bool(new_address.ip) and bool(new_address.prefixlen):
+            self.ipr.addr(
+                    'add',
+                    index=device_id,
+                    address=str(new_address.ip),
+                    mask=new_address.prefixlen
             )
 
     def _set_mac(self, device_id: int, mac: netaddr.EUI) -> None:
@@ -390,6 +413,32 @@ class AIPRoute():
                     self.executor,
                     partial(self._set_address, device_id, address)
             )
+
+    async def flush_address(self, device_id: int) -> None:
+        if device_id <= 0:
+            return
+
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor, partial(self._flush_address, device_id)
+            )
+
+    async def replace_address(
+            self, device_id: int, old_address: netaddr.IPNetwork,
+            new_address: netaddr.IPNetwork
+    ) -> netaddr.IPNetwork:
+        if device_id <= 0:
+            return netaddr.IPNetwork('0.0.0.0/0')
+
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor,
+                    partial(
+                            self._replace_address, device_id, old_address,
+                            new_address
+                    )
+            )
+        return new_address
 
     async def set_mtu(self, device_id: int, mtu: int) -> None:
         if device_id <= 0 or mtu <= 0:
