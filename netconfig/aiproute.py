@@ -172,12 +172,17 @@ class AIPRoute():
             new_address: netaddr.IPNetwork
     ) -> None:
         if bool(old_address.ip) and bool(old_address.prefixlen):
-            self.ipr.addr(
-                    'del',
-                    index=device_id,
-                    address=str(old_address.ip),
-                    mask=old_address.prefixlen
-            )
+            try:
+                self.ipr.addr(
+                        'del',
+                        index=device_id,
+                        address=str(old_address.ip),
+                        mask=old_address.prefixlen
+                )
+            except NetlinkError:
+                # delete can fail if the ip address doesn't exist,
+                # but we still want to set it
+                pass
 
         if bool(new_address.ip) and bool(new_address.prefixlen):
             self.ipr.addr(
