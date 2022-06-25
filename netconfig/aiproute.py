@@ -108,9 +108,19 @@ class AIPRoute():
         try:
             self.ipr.link('set', index=device_id, master=master_id)
 
-        except (OSError, NetlinkError):
+        except NetlinkError as exc:
+            if exc.code == 16:
+                # device busy
+                time.sleep(2)
+                self.ipr.link('set', index=device_id, master=master_id)
+            else:
+
+                        f" to bridge {master_id}: {exc}"
+                )
+
+        except OSError as exc:
             raise RuntimeError(
-                    f"Failed to add {device_id} to bridge {master_id}"
+                    f"Failed to add {device_id} to bridge {master_id}: {exc}"
             )
 
     def _set_stp(self, device_id: int, stp: int) -> None:
@@ -141,6 +151,12 @@ class AIPRoute():
                 raise FileExistsError(
                         f"Device {device_name} already exists"
                 ) from exc
+            elif exc.code == 16:
+                # device busy
+                time.sleep(2)
+                self.ipr.link(
+                        'add', ifname=device_name, kind=device_type, **kwargs
+                )
             else:
                 raise
 
@@ -207,6 +223,7 @@ class AIPRoute():
             self.ipr.link("set", index=device_id, ifname=device_name)
         except NetlinkError as exc:
             if exc.code == 16:
+                # device busy
                 time.sleep(2)
                 self.ipr.link("set", index=device_id, ifname=device_name)
             else:
