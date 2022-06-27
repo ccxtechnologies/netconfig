@@ -114,7 +114,8 @@ class AIPRoute():
                 time.sleep(2)
                 self.ipr.link('set', index=device_id, master=master_id)
             else:
-
+                raise RuntimeError(
+                        f"Failed to add {device_id}"
                         f" to bridge {master_id}: {exc}"
                 )
 
