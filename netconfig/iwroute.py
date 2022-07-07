@@ -158,6 +158,15 @@ class IWRoute:
                     self.executor, partial(self.iw.del_interface, device_id)
             )
 
+    async def get_stations(self, device_id: int) -> None:
+        if device_id <= 0:
+            return
+
+        async with self.lock:
+            return await self.loop.run_in_executor(
+                    self.executor, partial(self.iw.get_stations, device_id)
+            )
+
     async def set_tx_power_limit(self, phy_id: int, tx_power_dbm: int) -> None:
         if phy_id < 0:
             return
