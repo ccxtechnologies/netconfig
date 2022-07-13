@@ -5,6 +5,8 @@ import socket
 import struct
 import asyncio
 
+from .iface import Iface
+
 BUFFER_SIZE = 1048576
 READ_SIZE = 65535
 
@@ -21,6 +23,19 @@ IFF_UP = (1 << 0)
 IFF_LOWER_UP = (1 << 16)
 
 IFLA_IFNAME = 3
+
+
+async def _check_link_state(queues):
+    devices = Iface.get_all()
+
+    for device in devices:
+        if device not in queues:
+            continue
+
+        iface = Iface(device)
+        messages = {"up": iface.get_up(), "lower_up": iface.get_lower_up()}
+
+        await queues[device].put(messages)
 
 
 async def monitor_state_change(queues):
@@ -54,6 +69,8 @@ async def monitor_state_change(queues):
             await loop._create_connection_transport(
                     skt, lambda: protocol, None, ''
             )
+
+        await _check_link_state(queues)
 
         while True:
             # NOTE: There is a bug in the stock asyncio library and this
