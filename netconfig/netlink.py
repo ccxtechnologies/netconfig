@@ -41,7 +41,7 @@ async def monitor_state_change(queues):
     """Monitors for up / lower_up state changes on network interfaces.
 
     Loads a message dictionary into queues, with keys for different events.
-    Currently support "up", "lower_up", and start.
+    Currently support "up", "lower_up", and "start".
 
     Args:
         queues: a dictionary of queues, one queue for each interface
