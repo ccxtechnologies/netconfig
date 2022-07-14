@@ -25,7 +25,7 @@ IFF_MULTICAST = (1 << 12)
 IFF_PORTSEL = (1 << 13)
 IFF_AUTOMEDIA = (1 << 14)
 IFF_DYNAMIC = (1 << 15)
-IFF_LOWER_UP = (1 << 16)
+IFF_LOWER_UP = (1 << 16)  # can't use ioctl to get IFF_LOWER_UP
 IFF_DORMANT = (1 << 17)
 IFF_ECHO = (1 << 18)
 
@@ -305,11 +305,6 @@ class Iface:
         ifr = self._ifreq()
         fcntl.ioctl(self.sock, SIOCGIFFLAGS, ifr)
         return (ifr.data.ifr_flags & IFF_UP) == IFF_UP
-
-    def get_lower_up(self):
-        ifr = self._ifreq()
-        fcntl.ioctl(self.sock, SIOCGIFFLAGS, ifr)
-        return (ifr.data.ifr_flags & IFF_LOWER_UP) == IFF_LOWER_UP
 
     def set_up(self, value):
         ifr = self._ifreq()

@@ -25,15 +25,14 @@ IFF_LOWER_UP = (1 << 16)
 IFLA_IFNAME = 3
 
 
-async def _check_link_state(queues):
+async def _send_start_message(queues):
     devices = Iface.get_all()
 
     for device in devices:
         if device not in queues:
             continue
 
-        iface = Iface(device)
-        messages = {"up": iface.get_up(), "lower_up": iface.get_lower_up()}
+        messages = {"start": True}
 
         await queues[device].put(messages)
 
@@ -70,7 +69,7 @@ async def monitor_state_change(queues):
                     skt, lambda: protocol, None, ''
             )
 
-        await _check_link_state(queues)
+        await _send_start_message(queues)
 
         while True:
             # NOTE: There is a bug in the stock asyncio library and this
