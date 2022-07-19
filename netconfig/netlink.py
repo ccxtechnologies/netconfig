@@ -5,6 +5,8 @@ import socket
 import struct
 import asyncio
 
+from .iface import Iface
+
 BUFFER_SIZE = 1048576
 READ_SIZE = 65535
 
@@ -27,7 +29,7 @@ async def monitor_state_change(queues):
     """Monitors for up / lower_up state changes on network interfaces.
 
     Loads a message dictionary into queues, with keys for different events.
-    Currently support "up" and "lower_up".
+    Currently support "up", "lower_up", and "start".
 
     Args:
         queues: a dictionary of queues, one queue for each interface
@@ -42,6 +44,8 @@ async def monitor_state_change(queues):
         skt.setblocking(0)
         skt.bind((0, RTMGRP_LINK))
         skt.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, BUFFER_SIZE)
+
+        start_sent = False
 
         # I would like to use something like asyncio.open_connection but
         # it doesn't understand socket.AF_NETLINK / socket.SOCK_RAW so have to
@@ -109,3 +113,14 @@ async def monitor_state_change(queues):
 
             if iface in queues:
                 await queues[iface].put(messages)
+
+            # Once the first message is sent the monitor is ready,
+            # so send start to all interfaces
+            if not start_sent:
+                for device in Iface.get_all():
+                    if device not in queues:
+                        continue
+
+                    await queues[device].put({"start": True})
+
+                start_sent = True

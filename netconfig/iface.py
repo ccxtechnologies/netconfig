@@ -25,7 +25,7 @@ IFF_MULTICAST = (1 << 12)
 IFF_PORTSEL = (1 << 13)
 IFF_AUTOMEDIA = (1 << 14)
 IFF_DYNAMIC = (1 << 15)
-IFF_LOWER_UP = (1 << 16)
+IFF_LOWER_UP = (1 << 16)  # can't use ioctl to get IFF_LOWER_UP
 IFF_DORMANT = (1 << 17)
 IFF_ECHO = (1 << 18)
 
