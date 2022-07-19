@@ -25,18 +25,6 @@ IFF_LOWER_UP = (1 << 16)
 IFLA_IFNAME = 3
 
 
-async def _send_start_message(queues):
-    devices = Iface.get_all()
-
-    for device in devices:
-        if device not in queues:
-            continue
-
-        messages = {"start": True}
-
-        await queues[device].put(messages)
-
-
 async def monitor_state_change(queues):
     """Monitors for up / lower_up state changes on network interfaces.
 
@@ -70,8 +58,6 @@ async def monitor_state_change(queues):
             await loop._create_connection_transport(
                     skt, lambda: protocol, None, ''
             )
-
-        await _send_start_message(queues)
 
         while True:
             # NOTE: There is a bug in the stock asyncio library and this
