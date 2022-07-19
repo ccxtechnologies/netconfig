@@ -57,6 +57,8 @@ async def monitor_state_change(queues):
         skt.bind((0, RTMGRP_LINK))
         skt.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, BUFFER_SIZE)
 
+        start_sent = False
+
         # I would like to use something like asyncio.open_connection but
         # it doesn't understand socket.AF_NETLINK / socket.SOCK_RAW so have to
         # use the _create_connection_transport method
@@ -125,3 +127,14 @@ async def monitor_state_change(queues):
 
             if iface in queues:
                 await queues[iface].put(messages)
+
+            # Once the first message is sent the monitor is ready,
+            # so send start to all interfaces
+            if not start_sent:
+                for device in Iface.get_all():
+                    if device not in queues:
+                        continue
+
+                    await queues[device].put({"start": True})
+
+                start_sent = True
