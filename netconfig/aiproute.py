@@ -67,7 +67,7 @@ class AIPRoute():
 
         return (ifi_flags & (IFF_UP | IFF_LOWER_UP)) == (IFF_UP | IFF_LOWER_UP)
 
-    def _get_arp_cache(self, device_id: int) -> dict:
+    def _get_arp_cache(self, device_id: int, stale_timeout: int = 60) -> dict:
         try:
             response = self.ipr.get_neighbours(ifindex=device_id)
         except NetlinkError:
@@ -82,7 +82,9 @@ class AIPRoute():
                     address = value
                 elif name == "NDA_LLADDR":
                     mac = value
-            if mac and address:
+                elif name == "NDA_CACHEINFO":
+                    confirmed_secs = value["ndm_confirmed"] / 100
+            if mac and address and (confirmed_secs < stale_timeout):
                 cache[mac] = address
 
         return cache
@@ -500,13 +502,16 @@ class AIPRoute():
                     self.executor, partial(self._set_up, device_id, state)
             )
 
-    async def get_arp_cache(self, device_id: int) -> dict:
+    async def get_arp_cache(
+            self, device_id: int, stale_timeout: int = 60
+    ) -> dict:
         if device_id <= 0:
             return None
 
         async with self.lock:
             return await self.loop.run_in_executor(
-                    self.executor, partial(self._get_arp_cache, device_id)
+                    self.executor,
+                    partial(self._get_arp_cache, device_id, stale_timeout)
             )
 
     async def flush_rules(self, **kwargs) -> None:
