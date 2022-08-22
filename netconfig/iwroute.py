@@ -154,9 +154,15 @@ class IWRoute:
             return
 
         async with self.lock:
-            await self.loop.run_in_executor(
-                    self.executor, partial(self.iw.del_interface, device_id)
-            )
+            try:
+                await self.loop.run_in_executor(
+                        self.executor,
+                        partial(self.iw.del_interface, device_id)
+                )
+            except NetlinkError as exc:
+                if exc.code == 19:
+                    # if it doesn't exist that's okay
+                    pass
 
     async def get_stations(self, device_id: int) -> None:
         if device_id <= 0:
