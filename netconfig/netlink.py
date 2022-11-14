@@ -71,6 +71,7 @@ async def monitor_state_change(queues):
             except OSError as exc:
                 if exc.errno == 105:
                     # No buffer space so retry later
+                    start_sent = False
                     await asyncio.sleep(3.2)
                     continue
                 else:
