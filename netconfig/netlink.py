@@ -63,10 +63,18 @@ async def monitor_state_change(queues):
             # NOTE: There is a bug in the stock asyncio library and this
             # will this will only work with uvloop, refer to an older
             # version based on loop._create_connection_transport
-            if type(loop) == asyncio.unix_events._UnixSelectorEventLoop:
-                data = await reader.read(READ_SIZE)
-            else:
-                data = await loop.sock_recv(skt, READ_SIZE)
+            try:
+                if type(loop) == asyncio.unix_events._UnixSelectorEventLoop:
+                    data = await reader.read(READ_SIZE)
+                else:
+                    data = await loop.sock_recv(skt, READ_SIZE)
+            except OSError as exc:
+                if exc.errno == 105:
+                    # No buffer space so retry later
+                    await asyncio.sleep(3.2)
+                    continue
+                else:
+                    raise
 
             msg_len, msg_type, flags, _, _ = struct.unpack("=LHHLL", data[:16])
 
