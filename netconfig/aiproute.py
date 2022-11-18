@@ -96,6 +96,10 @@ class AIPRoute():
             if exc.code == 19:
                 # if it doesn't exist that's okay
                 pass
+            elif exc.code == 95:
+                # newer kernels can return operation not
+                # supported instead of no such device
+                pass
             else:
                 raise
         else:
