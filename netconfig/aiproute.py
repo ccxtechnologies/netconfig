@@ -5,7 +5,10 @@ import asyncio
 import netaddr
 import time
 from pyroute2 import IPRoute
-from pyroute2 import IPLinkRequest
+try:
+    from pyroute2 import IPLinkRequest
+except ImportError:
+    IPLinkRequest = dict
 from pyroute2.netlink.exceptions import NetlinkError
 from functools import partial
 
