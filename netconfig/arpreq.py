@@ -21,6 +21,7 @@ async def arpreq(
     with socket.socket(
             socket.AF_PACKET, socket.SOCK_RAW, socket.SOCK_RAW
     ) as _socket:
+        _socket.setblocking(0)
         _socket.bind((if_name, socket.SOCK_RAW))
 
         # I would like to use something like asyncio.open_connection but
