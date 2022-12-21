@@ -8,7 +8,7 @@ async def _get_rt_value(name: str, rt_file: str) -> int:
         async for line in fi:
             if line[0] == '#':
                 continue
-            label = line.split(' ', 1)[-1].strip()
+            label = line.split(' ', 1)[-1].split('\t')[-1].strip()
             if label == name:
                 return int(line.split()[0])
     raise RuntimeError(f"Unable to find {name} in {rt_file}")
