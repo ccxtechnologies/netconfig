@@ -316,6 +316,16 @@ class Iface:
             ifr.data.ifr_flags &= ~IFF_UP
             fcntl.ioctl(self.sock, SIOCSIFFLAGS, ifr)
 
+    def set_noarp(self, value):
+        ifr = self._ifreq()
+        fcntl.ioctl(self.sock, SIOCGIFFLAGS, ifr)
+        if value and not (ifr.data.ifr_flags & IFF_NOARP):
+            ifr.data.ifr_flags |= IFF_NOARP
+            fcntl.ioctl(self.sock, SIOCSIFFLAGS, ifr)
+        elif not value and (ifr.data.ifr_flags & IFF_NOARP):
+            ifr.data.ifr_flags &= ~IFF_NOARP
+            fcntl.ioctl(self.sock, SIOCSIFFLAGS, ifr)
+
     def get_mtu(self):
         ifr = self._ifreq()
         fcntl.ioctl(self.sock, SIOCGIFMTU, ifr)
