@@ -81,8 +81,8 @@ class WGRoute:
             _attrs = self.get_attr(attr_name, _attrs)
         return _attrs
 
-    async def get_peer_stats(self, interface=None, ifindex=None):
-        msg = await self.info(interface=interface, ifindex=ifindex)
+    async def get_peer_stats(self, ifname=None, ifindex=None):
+        msg = await self.info(ifname=ifname, ifindex=ifindex)
         if msg is None:
             return {}
 
