@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: 2020, CCX Technologies
+# Copyright: 2020-2023, CCX Technologies
 
 import asyncio
 import netaddr
@@ -69,6 +69,17 @@ class AIPRoute():
             return False
 
         return (ifi_flags & (IFF_UP | IFF_LOWER_UP)) == (IFF_UP | IFF_LOWER_UP)
+
+    def _get_stats(self, device_id: int) -> bool:
+        try:
+            links = self.ipr.get_links(device_id)
+        except NetlinkError:
+            return None
+
+        try:
+            return links[0].get_attr('IFLA_STATS64')
+        except (IndexError, KeyError):
+            return None
 
     def _get_arp_cache(self, device_id: int, stale_timeout: int = 60) -> dict:
         try:
@@ -388,6 +399,15 @@ class AIPRoute():
         async with self.lock:
             return await self.loop.run_in_executor(
                     self.executor, partial(self._get_up, device_id)
+            )
+
+    async def get_stats(self, device_id: int) -> str:
+        if device_id <= 0:
+            return None
+
+        async with self.lock:
+            return await self.loop.run_in_executor(
+                    self.executor, partial(self._get_stats, device_id)
             )
 
     async def delete_device(self, device_name: str) -> None:
