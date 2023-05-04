@@ -81,5 +81,25 @@ class WGRoute:
             _attrs = self.get_attr(attr_name, _attrs)
         return _attrs
 
+    async def get_peer_stats(self, interface=None, ifindex=None):
+        msg = await self.info(interface=interface, ifindex=ifindex)
+        if msg is None:
+            return {}
+
+        if msg[0].get_attr('WGDEVICE_A_PEERS') is None:
+            return {}
+
+        peers = {}
+        for peer in msg[0].get_attr('WGDEVICE_A_PEERS'):
+            key = peer.get_attr('WGPEER_A_PUBLIC_KEY')
+            last_handshake = peer.get_attr('WGPEER_A_LAST_HANDSHAKE_TIME')
+            rx_bytes = peer.get_attr('WGPEER_A_RX_BYTES')
+            tx_bytes = peer.get_attr('WGPEER_A_TX_BYTES')
+            endpoint = peer.get_attr('WGPEER_A_ENDPOINT')
+
+            peers[key] = (last_handshake, rx_bytes, tx_bytes, endpoint)
+
+        return peers
+
     def close(self):
         self.wg.close()
