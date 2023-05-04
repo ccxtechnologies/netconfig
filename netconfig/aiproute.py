@@ -72,12 +72,12 @@ class AIPRoute():
 
     def _get_stats(self, device_id: int) -> bool:
         try:
-            links = self.ipr.get_links(device_id)
+            stats = self.ipr.stats("get", ifindex=device_id)
         except NetlinkError:
             return None
 
         try:
-            return links[0].get_attr('IFLA_STATS64')
+            return stats[0].get_attr('IFLA_STATS_LINK_64')
         except (IndexError, KeyError):
             return None
 
