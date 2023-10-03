@@ -4,7 +4,7 @@
 import asyncio
 import netaddr
 import time
-from pyroute2 import IPRoute
+from pyroute2 import IPRoute  # noqa pylint: disable=no-name-in-module, import-error
 try:
     from pyroute2 import IPLinkRequest
 except ImportError:
