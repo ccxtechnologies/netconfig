@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: 2017, CCX Technologies
+# Copyright: 2017-2024, CCX Technologies
 
 import ctypes
 import socket
@@ -164,6 +164,9 @@ class mii_ioctl_data(ctypes.Structure):
 class ifreq(ctypes.Structure):
     _pack_ = 1
     _fields_ = [('ifr_name', (ctypes.c_ubyte * 16)), ('data', mii_ioctl_data)]
+
+    def __init__(self, ifname):
+        self.ifr_name = (ctypes.c_ubyte * 16)(*bytearray(ifname.encode()))
 
 
 def mdio_read_reg(ifname, reg):

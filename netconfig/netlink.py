@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: 2017-2022, CCX Technologies
+# Copyright: 2017-2024, CCX Technologies
 
 import socket
 import struct

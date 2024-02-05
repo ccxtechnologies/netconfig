@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: 2017, CCX Technologies
+# Copyright: 2017-2024, CCX Technologies
 
 import ctypes
 import socket
@@ -318,17 +318,18 @@ class EthTool:
         ifr = ifreq()
         ecmd = ethtool_cmd()
         ifr.ifr_data.ethtool_cmd_ptr = ctypes.pointer(ecmd)
-        ifr.ifr_name = self._name
+        ifr.ifr_name = self._name  # noqa pylint: disable=attribute-defined-outside-init
         return ifr, ecmd
 
     def _ifreq_value(self):
         ifr = ifreq()
         evalue = ethtool_value()
         ifr.ifr_data.ethtool_value_ptr = ctypes.pointer(evalue)
-        ifr.ifr_name = self._name
+        ifr.ifr_name = self._name  # noqa pylint: disable=attribute-defined-outside-init
         return ifr, evalue
 
     def get_settings(self):
+        # noqa pylint: disable=attribute-defined-outside-init
         ifr, ecmd = self._ifreq_ecmd()
 
         ecmd.cmd = ETHTOOL_GSET
@@ -341,11 +342,12 @@ class EthTool:
                 raise
 
         return self._dump_ecmd(ecmd)
+        # noqa pylint: enable=attribute-defined-outside-init
 
     def link_detected(self):
         ifr, evalue = self._ifreq_value()
 
-        evalue.cmd = ETHTOOL_GLINK
+        evalue.cmd = ETHTOOL_GLINK  # noqa pylint: disable=attribute-defined-outside-init
         try:
             fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
             return bool(evalue.data)
@@ -356,6 +358,7 @@ class EthTool:
                 raise
 
     def enable_autoneg(self):
+        # noqa pylint: disable=attribute-defined-outside-init
         ifr, ecmd = self._ifreq_ecmd()
 
         ecmd.cmd = ETHTOOL_GSET
@@ -364,8 +367,10 @@ class EthTool:
         ecmd.cmd = ETHTOOL_SSET
         ecmd.autoneg = self.AUTONEG_ENABLE
         fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
+        # noqa pylint: enable=attribute-defined-outside-init
 
     def force_speed(self, speed, duplex):
+        # noqa pylint: disable=attribute-defined-outside-init
         ifr, ecmd = self._ifreq_ecmd()
 
         ecmd.cmd = ETHTOOL_GSET
@@ -376,8 +381,10 @@ class EthTool:
         ecmd.speed = speed
         ecmd.duplex = duplex
         fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
+        # noqa pylint: enable=attribute-defined-outside-init
 
     def set_advertised(self, advertise):
+        # noqa pylint: disable=attribute-defined-outside-init
         ifr, ecmd = self._ifreq_ecmd()
 
         ecmd.cmd = ETHTOOL_GSET
@@ -386,6 +393,7 @@ class EthTool:
         ecmd.cmd = ETHTOOL_SSET
         ecmd.advertising = ecmd.supported & advertise
         fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
+        # noqa pylint: enable=attribute-defined-outside-init
 
     def _dump_supported(self, mask):
         supported = []
