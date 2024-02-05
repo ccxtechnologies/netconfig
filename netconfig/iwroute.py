@@ -4,13 +4,15 @@
 import asyncio
 from functools import partial
 
-from pr2modules.netlink.nl80211 import nl80211cmd  # noqa pylint: disable=no-name-in-module, import-error
-from pr2modules.netlink.nl80211 import NL80211_NAMES  # noqa pylint: disable=no-name-in-module, import-error
-from pr2modules.netlink import NLM_F_ACK  # noqa pylint: disable=no-name-in-module, import-error
-from pr2modules.netlink import NLM_F_REQUEST  # noqa pylint: disable=no-name-in-module, import-error
-from pyroute2.netlink.exceptions import NetlinkError  # noqa pylint: disable=no-name-in-module, import-error
+# noqa pylint: disable=no-name-in-module, import-error
+from pr2modules.netlink.nl80211 import nl80211cmd
+from pr2modules.netlink.nl80211 import NL80211_NAMES
+from pr2modules.netlink import NLM_F_ACK
+from pr2modules.netlink import NLM_F_REQUEST
+from pyroute2.netlink.exceptions import NetlinkError
 
-from pyroute2 import IW  # noqa pylint: disable=no-name-in-module, import-error
+from pyroute2 import IW
+# noqa pylint: enable=no-name-in-module, import-error
 
 
 class IWRoute:

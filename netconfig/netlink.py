@@ -52,10 +52,10 @@ async def monitor_state_change(queues):
         # use the _create_connection_transport method
         loop = asyncio.get_event_loop()
 
-        if isinstance(loop) == asyncio.unix_events._UnixSelectorEventLoop:
+        if isinstance(loop, asyncio.unix_events._UnixSelectorEventLoop):  # noqa pylint: disable=protected-access
             reader = asyncio.streams.StreamReader(loop=loop)
             protocol = asyncio.streams.StreamReaderProtocol(reader, loop=loop)
-            await loop._create_connection_transport(
+            await loop._create_connection_transport(  # noqa pylint: disable=protected-access
                     skt, lambda: protocol, None, ''
             )
 
@@ -66,7 +66,7 @@ async def monitor_state_change(queues):
             try:
                 if isinstance(
                         loop
-                ) == asyncio.unix_events._UnixSelectorEventLoop:
+                ) == asyncio.unix_events._UnixSelectorEventLoop:  # noqa pylint: disable=protected-access
                     data = await reader.read(READ_SIZE)
                 else:
                     data = await loop.sock_recv(skt, READ_SIZE)
