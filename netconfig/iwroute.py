@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: 2022-2024, CCX Technologies
+# Copyright: 2022, CCX Technologies
 
 import asyncio
 from functools import partial

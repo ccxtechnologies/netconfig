@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: 2017-2024, CCX Technologies
+# Copyright: 2017, CCX Technologies
 
 import fcntl
 import socket
@@ -253,12 +253,12 @@ def _sockaddr_from_string(addr):
     return sin4
 
 
-def _sockaddr_to_string(sockaddress):
-    if sockaddress.gen.sa_family == 0:
+def _sockaddr_to_string(sockadd):
+    if sockadd.gen.sa_family == 0:
         return 'None'
 
-    p = struct.pack('<L', _get_sin_addr(sockaddress))
-    return socket.inet_ntop(sockaddress.gen.sa_family, p)
+    p = struct.pack('<L', _get_sin_addr(sockadd))
+    return socket.inet_ntop(sockadd.gen.sa_family, p)
 
 
 # ===============================================================
