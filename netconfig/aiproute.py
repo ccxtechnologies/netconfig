@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: 2020, CCX Technologies
+# Copyright: 2020-2023, CCX Technologies
 
 import asyncio
 import netaddr
