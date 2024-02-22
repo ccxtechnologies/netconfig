@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: 2020, CCX Technologies
+# Copyright: 2020-2024, CCX Technologies
 
 import asyncio
 
@@ -82,22 +82,23 @@ class WGRoute:
         return _attrs
 
     async def get_peer_stats(self, ifname=None, ifindex=None):
-        msg = await self.info(ifname=ifname, ifindex=ifindex)
-        if msg is None:
-            return {}
-
-        if msg[0].get_attr('WGDEVICE_A_PEERS') is None:
+        messages = await self.info(ifname=ifname, ifindex=ifindex)
+        if messages is None:
             return {}
 
         peers = {}
-        for peer in msg[0].get_attr('WGDEVICE_A_PEERS'):
-            key = peer.get_attr('WGPEER_A_PUBLIC_KEY')
-            last_handshake = peer.get_attr('WGPEER_A_LAST_HANDSHAKE_TIME')
-            rx_bytes = peer.get_attr('WGPEER_A_RX_BYTES')
-            tx_bytes = peer.get_attr('WGPEER_A_TX_BYTES')
-            endpoint = peer.get_attr('WGPEER_A_ENDPOINT')
+        for msg in messages:
+            if msg.get_attr('WGDEVICE_A_PEERS') is None:
+                continue
 
-            peers[key] = (last_handshake, rx_bytes, tx_bytes, endpoint)
+            for peer in msg.get_attr('WGDEVICE_A_PEERS'):
+                key = peer.get_attr('WGPEER_A_PUBLIC_KEY')
+                last_handshake = peer.get_attr('WGPEER_A_LAST_HANDSHAKE_TIME')
+                rx_bytes = peer.get_attr('WGPEER_A_RX_BYTES')
+                tx_bytes = peer.get_attr('WGPEER_A_TX_BYTES')
+                endpoint = peer.get_attr('WGPEER_A_ENDPOINT')
+
+                peers[key] = (last_handshake, rx_bytes, tx_bytes, endpoint)
 
         return peers
 
