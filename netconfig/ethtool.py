@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: 2017-2024, CCX Technologies
+# Copyright: 2017, CCX Technologies
 
 import ctypes
 import socket
