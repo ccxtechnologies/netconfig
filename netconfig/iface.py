@@ -293,7 +293,7 @@ class Iface:
 
     def _ifreq(self):
         ifr = ifreq()
-        ifr.ifr_name = (ctypes.c_ubyte * IFNAMSIZ)(*bytearray(self._name))  # noqa pylint: disable=attribute-defined-outside-init
+        ifr.ifr_name = (ctypes.c_ubyte * IFNAMSIZ)(*bytearray(self._name))
         return ifr
 
     def get_index(self):
