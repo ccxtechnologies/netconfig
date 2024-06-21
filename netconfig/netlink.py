@@ -65,8 +65,9 @@ async def monitor_state_change(queues):
             # version based on loop._create_connection_transport
             try:
                 if isinstance(
-                        loop, asyncio.unix_events._UnixSelectorEventLoop
-                ):  # noqa pylint: disable=protected-access
+                        loop,
+                        asyncio.unix_events._UnixSelectorEventLoop  # noqa pylint: disable=protected-access
+                ):
                     data = await reader.read(READ_SIZE)
                 else:
                     data = await loop.sock_recv(skt, READ_SIZE)

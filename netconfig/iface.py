@@ -235,11 +235,11 @@ class ifreq(ctypes.Structure):
 # ===============================================================
 
 
-def _get_sin_addr(sockaddr):
-    if sockaddr.gen.sa_family == socket.AF_INET:
-        return sockaddr.in4.sin_addr.s_addr
-    if sockaddr.gen.sa_family == socket.AF_INET6:
-        return sockaddr.in6.sin6_addr.in6_u
+def _get_sin_addr(sockadd):
+    if sockadd.gen.sa_family == socket.AF_INET:
+        return sockadd.in4.sin_addr.s_addr
+    if sockadd.gen.sa_family == socket.AF_INET6:
+        return sockadd.in6.sin6_addr.in6_u
     return 0
 
 
@@ -253,12 +253,12 @@ def _sockaddr_from_string(addr):
     return sin4
 
 
-def _sockaddr_to_string(sockaddr):
-    if sockaddr.gen.sa_family == 0:
+def _sockaddr_to_string(sockadd):
+    if sockadd.gen.sa_family == 0:
         return 'None'
 
-    p = struct.pack('<L', _get_sin_addr(sockaddr))
-    return socket.inet_ntop(sockaddr.gen.sa_family, p)
+    p = struct.pack('<L', _get_sin_addr(sockadd))
+    return socket.inet_ntop(sockadd.gen.sa_family, p)
 
 
 # ===============================================================
