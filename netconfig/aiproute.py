@@ -116,6 +116,9 @@ class AIPRoute():
                 pass
             else:
                 raise
+        except OSError:
+            # if bad file descriptor nothing to delete
+            pass
         else:
             for _ in range(0, 10):
                 _id = self._get_id(device_name)
