@@ -20,6 +20,8 @@ IFF_LOWER_UP = (1 << 16)
 
 class AIPRoute():
 
+    NetlinkError = NetlinkError
+
     def __init__(self, loop=None, executor=None):
         self.loop = asyncio.get_event_loop() if loop is None else loop
         self.executor = executor
