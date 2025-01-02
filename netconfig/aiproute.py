@@ -1,5 +1,4 @@
-#!/usr/bin/python
-# Copyright: 2020-2023, CCX Technologies
+# Copyright: 2020-2025, CCX Technologies
 
 import asyncio
 import netaddr
@@ -127,24 +126,33 @@ class AIPRoute():
                 raise RuntimeError(f"Failed to remove {device_name}")
 
     def _set_master(self, device_id: int, master_id: int) -> None:
-        try:
-            self.ipr.link('set', index=device_id, master=master_id)
 
-        except NetlinkError as exc:
-            if exc.code == 16:
-                # device busy
-                time.sleep(2)
+        for i in range(0, 10):
+            try:
                 self.ipr.link('set', index=device_id, master=master_id)
-            else:
+
+            except NetlinkError as exc:
+                if exc.code == 16:  # device busy
+                    pass
+                else:
+                    raise RuntimeError(
+                            f"Failed to add {device_id}"
+                            f" to bridge {master_id}: {exc}"
+                    )
+
+            except OSError as exc:
                 raise RuntimeError(
-                        f"Failed to add {device_id}"
-                        f" to bridge {master_id}: {exc}"
+                        f"Failed to add {device_id} to bridge"
+                        f" {master_id}: {exc}"
                 )
 
-        except OSError as exc:
-            raise RuntimeError(
-                    f"Failed to add {device_id} to bridge {master_id}: {exc}"
-            )
+            else:
+                break
+
+            time.sleep(2)
+
+        else:
+            raise RuntimeError(f"Device busy in {i} attempts")
 
     def _set_stp(self, device_id: int, stp: int) -> None:
         try:
