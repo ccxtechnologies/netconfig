@@ -92,6 +92,7 @@ class AIPRoute():
         for r in response:
             mac = None
             address = None
+            confirmed_secs = None
             for name, value in r['attrs']:
                 if name == "NDA_DST":
                     address = value
@@ -99,7 +100,9 @@ class AIPRoute():
                     mac = value
                 elif name == "NDA_CACHEINFO":
                     confirmed_secs = value["ndm_confirmed"] / 100
-            if mac and address and (confirmed_secs < stale_timeout):
+            if mac and address and confirmed_secs and (
+                    confirmed_secs < stale_timeout
+            ):
                 cache[mac] = address
 
         return cache
