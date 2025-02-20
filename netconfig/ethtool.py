@@ -1,5 +1,4 @@
-#!/usr/bin/python
-# Copyright: 2017, CCX Technologies
+# Copyright: 2017-2025, CCX Technologies
 
 import ctypes
 import socket
@@ -139,68 +138,68 @@ class ifreq(ctypes.Structure):
 
 
 class EthTool:
-    SUPPORTED_10baseT_Half = (1 << 0)
-    SUPPORTED_10baseT_Full = (1 << 1)
-    SUPPORTED_100baseT_Half = (1 << 2)
-    SUPPORTED_100baseT_Full = (1 << 3)
-    SUPPORTED_1000baseT_Half = (1 << 4)
-    SUPPORTED_1000baseT_Full = (1 << 5)
-    SUPPORTED_Autoneg = (1 << 6)
-    SUPPORTED_TP = (1 << 7)
-    SUPPORTED_AUI = (1 << 8)
-    SUPPORTED_MII = (1 << 9)
-    SUPPORTED_FIBRE = (1 << 10)
-    SUPPORTED_BNC = (1 << 11)
-    SUPPORTED_10000baseT_Full = (1 << 12)
-    SUPPORTED_Pause = (1 << 13)
-    SUPPORTED_Asym_Pause = (1 << 14)
-    SUPPORTED_2500baseX_Full = (1 << 15)
-    SUPPORTED_Backplane = (1 << 16)
-    SUPPORTED_1000baseKX_Full = (1 << 17)
-    SUPPORTED_10000baseKX4_Full = (1 << 18)
-    SUPPORTED_10000baseKR_Full = (1 << 19)
-    SUPPORTED_10000baseR_FEC = (1 << 20)
-    SUPPORTED_20000baseMLD2_Full = (1 << 21)
-    SUPPORTED_20000baseKR2_Full = (1 << 22)
-    SUPPORTED_40000baseKR4_Full = (1 << 23)
-    SUPPORTED_40000baseCR4_Full = (1 << 24)
-    SUPPORTED_40000baseSR4_Full = (1 << 25)
-    SUPPORTED_40000baseLR4_Full = (1 << 26)
-    SUPPORTED_56000baseKR4_Full = (1 << 27)
-    SUPPORTED_56000baseCR4_Full = (1 << 28)
-    SUPPORTED_56000baseSR4_Full = (1 << 29)
-    SUPPORTED_56000baseLR4_Full = (1 << 30)
-    ADVERTISED_10baseT_Half = (1 << 0)
-    ADVERTISED_10baseT_Full = (1 << 1)
-    ADVERTISED_100baseT_Half = (1 << 2)
-    ADVERTISED_100baseT_Full = (1 << 3)
-    ADVERTISED_1000baseT_Half = (1 << 4)
-    ADVERTISED_1000baseT_Full = (1 << 5)
-    ADVERTISED_Autoneg = (1 << 6)
-    ADVERTISED_TP = (1 << 7)
-    ADVERTISED_AUI = (1 << 8)
-    ADVERTISED_MII = (1 << 9)
-    ADVERTISED_FIBRE = (1 << 10)
-    ADVERTISED_BNC = (1 << 11)
-    ADVERTISED_10000baseT_Full = (1 << 12)
-    ADVERTISED_Pause = (1 << 13)
-    ADVERTISED_Asym_Pause = (1 << 14)
-    ADVERTISED_2500baseX_Full = (1 << 15)
-    ADVERTISED_Backplane = (1 << 16)
-    ADVERTISED_1000baseKX_Full = (1 << 17)
-    ADVERTISED_10000baseKX4_Full = (1 << 18)
-    ADVERTISED_10000baseKR_Full = (1 << 19)
-    ADVERTISED_10000baseR_FEC = (1 << 20)
-    ADVERTISED_20000baseMLD2_Full = (1 << 21)
-    ADVERTISED_20000baseKR2_Full = (1 << 22)
-    ADVERTISED_40000baseKR4_Full = (1 << 23)
-    ADVERTISED_40000baseCR4_Full = (1 << 24)
-    ADVERTISED_40000baseSR4_Full = (1 << 25)
-    ADVERTISED_40000baseLR4_Full = (1 << 26)
-    ADVERTISED_56000baseKR4_Full = (1 << 27)
-    ADVERTISED_56000baseCR4_Full = (1 << 28)
-    ADVERTISED_56000baseSR4_Full = (1 << 29)
-    ADVERTISED_56000baseLR4_Full = (1 << 30)
+    SUPPORTED_10baseT_Half = 1 << 0
+    SUPPORTED_10baseT_Full = 1 << 1
+    SUPPORTED_100baseT_Half = 1 << 2
+    SUPPORTED_100baseT_Full = 1 << 3
+    SUPPORTED_1000baseT_Half = 1 << 4
+    SUPPORTED_1000baseT_Full = 1 << 5
+    SUPPORTED_Autoneg = 1 << 6
+    SUPPORTED_TP = 1 << 7
+    SUPPORTED_AUI = 1 << 8
+    SUPPORTED_MII = 1 << 9
+    SUPPORTED_FIBRE = 1 << 10
+    SUPPORTED_BNC = 1 << 11
+    SUPPORTED_10000baseT_Full = 1 << 12
+    SUPPORTED_Pause = 1 << 13
+    SUPPORTED_Asym_Pause = 1 << 14
+    SUPPORTED_2500baseX_Full = 1 << 15
+    SUPPORTED_Backplane = 1 << 16
+    SUPPORTED_1000baseKX_Full = 1 << 17
+    SUPPORTED_10000baseKX4_Full = 1 << 18
+    SUPPORTED_10000baseKR_Full = 1 << 19
+    SUPPORTED_10000baseR_FEC = 1 << 20
+    SUPPORTED_20000baseMLD2_Full = 1 << 21
+    SUPPORTED_20000baseKR2_Full = 1 << 22
+    SUPPORTED_40000baseKR4_Full = 1 << 23
+    SUPPORTED_40000baseCR4_Full = 1 << 24
+    SUPPORTED_40000baseSR4_Full = 1 << 25
+    SUPPORTED_40000baseLR4_Full = 1 << 26
+    SUPPORTED_56000baseKR4_Full = 1 << 27
+    SUPPORTED_56000baseCR4_Full = 1 << 28
+    SUPPORTED_56000baseSR4_Full = 1 << 29
+    SUPPORTED_56000baseLR4_Full = 1 << 30
+    ADVERTISED_10baseT_Half = 1 << 0
+    ADVERTISED_10baseT_Full = 1 << 1
+    ADVERTISED_100baseT_Half = 1 << 2
+    ADVERTISED_100baseT_Full = 1 << 3
+    ADVERTISED_1000baseT_Half = 1 << 4
+    ADVERTISED_1000baseT_Full = 1 << 5
+    ADVERTISED_Autoneg = 1 << 6
+    ADVERTISED_TP = 1 << 7
+    ADVERTISED_AUI = 1 << 8
+    ADVERTISED_MII = 1 << 9
+    ADVERTISED_FIBRE = 1 << 10
+    ADVERTISED_BNC = 1 << 11
+    ADVERTISED_10000baseT_Full = 1 << 12
+    ADVERTISED_Pause = 1 << 13
+    ADVERTISED_Asym_Pause = 1 << 14
+    ADVERTISED_2500baseX_Full = 1 << 15
+    ADVERTISED_Backplane = 1 << 16
+    ADVERTISED_1000baseKX_Full = 1 << 17
+    ADVERTISED_10000baseKX4_Full = 1 << 18
+    ADVERTISED_10000baseKR_Full = 1 << 19
+    ADVERTISED_10000baseR_FEC = 1 << 20
+    ADVERTISED_20000baseMLD2_Full = 1 << 21
+    ADVERTISED_20000baseKR2_Full = 1 << 22
+    ADVERTISED_40000baseKR4_Full = 1 << 23
+    ADVERTISED_40000baseCR4_Full = 1 << 24
+    ADVERTISED_40000baseSR4_Full = 1 << 25
+    ADVERTISED_40000baseLR4_Full = 1 << 26
+    ADVERTISED_56000baseKR4_Full = 1 << 27
+    ADVERTISED_56000baseCR4_Full = 1 << 28
+    ADVERTISED_56000baseSR4_Full = 1 << 29
+    ADVERTISED_56000baseLR4_Full = 1 << 30
 
     # The forced speed, 10Mb, 100Mb, gigabit, [2.5|5|10|20|25|40|50|56|100]GbE.
     SPEED_10 = 10
@@ -252,13 +251,13 @@ class EthTool:
     ETH_TP_MDI_AUTO = 0x03  # control: auto-select
 
     # Wake-On-Lan options.
-    WAKE_PHY = (1 << 0)
-    WAKE_UCAST = (1 << 1)
-    WAKE_MCAST = (1 << 2)
-    WAKE_BCAST = (1 << 3)
-    WAKE_ARP = (1 << 4)
-    WAKE_MAGIC = (1 << 5)
-    WAKE_MAGICSECURE = (1 << 6)  # only meaningful if WAKE_MAGIC
+    WAKE_PHY = 1 << 0
+    WAKE_UCAST = 1 << 1
+    WAKE_MCAST = 1 << 2
+    WAKE_BCAST = 1 << 3
+    WAKE_ARP = 1 << 4
+    WAKE_MAGIC = 1 << 5
+    WAKE_MAGICSECURE = 1 << 6  # only meaningful if WAKE_MAGIC
 
     # L2-L4 network traffic flow types
     TCP_V4_FLOW = 0x01  # hash or spec (tcp_ip4_spec)
@@ -282,14 +281,14 @@ class EthTool:
     FLOW_MAC_EXT = 0x40000000
 
     # L3-L4 network traffic flow hash options
-    RXH_L2DA = (1 << 1)
-    RXH_VLAN = (1 << 2)
-    RXH_L3_PROTO = (1 << 3)
-    RXH_IP_SRC = (1 << 4)
-    RXH_IP_DST = (1 << 5)
-    RXH_L4_B_0_1 = (1 << 6)  # src port in case of TCP/UDP/SCTP
-    RXH_L4_B_2_3 = (1 << 7)  # dst port in case of TCP/UDP/SCTP
-    RXH_DISCARD = (1 << 31)
+    RXH_L2DA = 1 << 1
+    RXH_VLAN = 1 << 2
+    RXH_L3_PROTO = 1 << 3
+    RXH_IP_SRC = 1 << 4
+    RXH_IP_DST = 1 << 5
+    RXH_L4_B_0_1 = 1 << 6  # src port in case of TCP/UDP/SCTP
+    RXH_L4_B_2_3 = 1 << 7  # dst port in case of TCP/UDP/SCTP
+    RXH_DISCARD = 1 << 31
 
     RX_CLS_FLOW_DISC = 0xffffffffffffffff
 
@@ -318,73 +317,71 @@ class EthTool:
         ifr = ifreq()
         ecmd = ethtool_cmd()
         ifr.ifr_data.ethtool_cmd_ptr = ctypes.pointer(ecmd)
-        ifr.ifr_name = self._name
+        ifr.ifr_name = self._name  # noqa pylint: disable=attribute-defined-outside-init
         return ifr, ecmd
 
     def _ifreq_value(self):
         ifr = ifreq()
         evalue = ethtool_value()
         ifr.ifr_data.ethtool_value_ptr = ctypes.pointer(evalue)
-        ifr.ifr_name = self._name
+        ifr.ifr_name = self._name  # noqa pylint: disable=attribute-defined-outside-init
         return ifr, evalue
 
     def get_settings(self):
         ifr, ecmd = self._ifreq_ecmd()
 
-        ecmd.cmd = ETHTOOL_GSET
+        ecmd.cmd = ETHTOOL_GSET  # noqa pylint: disable=attribute-defined-outside-init
         try:
             fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
         except OSError as exc:
             if exc.errno == 95:
                 return None
-            else:
-                raise
+            raise
 
         return self._dump_ecmd(ecmd)
 
     def link_detected(self):
         ifr, evalue = self._ifreq_value()
 
-        evalue.cmd = ETHTOOL_GLINK
+        evalue.cmd = ETHTOOL_GLINK  # noqa pylint: disable=attribute-defined-outside-init
         try:
             fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
             return bool(evalue.data)
         except OSError as exc:
             if exc.errno == 45:
                 return False
-            else:
-                raise
+            raise
 
     def enable_autoneg(self):
         ifr, ecmd = self._ifreq_ecmd()
 
-        ecmd.cmd = ETHTOOL_GSET
+        ecmd.cmd = ETHTOOL_GSET  # noqa pylint: disable=attribute-defined-outside-init
         fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
 
-        ecmd.cmd = ETHTOOL_SSET
-        ecmd.autoneg = self.AUTONEG_ENABLE
+        ecmd.cmd = ETHTOOL_SSET  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.autoneg = self.AUTONEG_ENABLE  # noqa pylint: disable=attribute-defined-outside-init
         fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
 
     def force_speed(self, speed, duplex):
         ifr, ecmd = self._ifreq_ecmd()
 
-        ecmd.cmd = ETHTOOL_GSET
+        ecmd.cmd = ETHTOOL_GSET  # noqa pylint: disable=attribute-defined-outside-init
         fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
 
-        ecmd.cmd = ETHTOOL_SSET
+        ecmd.cmd = ETHTOOL_SSET  # noqa pylint: disable=attribute-defined-outside-init
         ecmd.autoneg = self.AUTONEG_DISABLE
-        ecmd.speed = speed
-        ecmd.duplex = duplex
+        ecmd.speed = speed  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.duplex = duplex  # noqa pylint: disable=attribute-defined-outside-init
         fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
 
     def set_advertised(self, advertise):
         ifr, ecmd = self._ifreq_ecmd()
 
-        ecmd.cmd = ETHTOOL_GSET
+        ecmd.cmd = ETHTOOL_GSET  # noqa pylint: disable=attribute-defined-outside-init
         fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
 
-        ecmd.cmd = ETHTOOL_SSET
-        ecmd.advertising = ecmd.supported & advertise
+        ecmd.cmd = ETHTOOL_SSET  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.advertising = ecmd.supported & advertise  # noqa pylint: disable=attribute-defined-outside-init
         fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
 
     def _dump_supported(self, mask):
