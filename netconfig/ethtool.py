@@ -113,6 +113,22 @@ class ethtool_cmd(ctypes.Structure):
     ]
 
 
+class ethtool_eee(ctypes.Structure):
+    _pack_ = 1
+    _fields_ = [
+            ('cmd', ctypes.c_uint32),
+            ('supported', ctypes.c_uint32),
+            ('advertised', ctypes.c_uint32),
+            ('lp_advertised', ctypes.c_uint32),
+            ('eee_active', ctypes.c_uint32),
+            ('eee_enabled', ctypes.c_uint32),
+            ('tx_lpi_enabled', ctypes.c_uint32),
+            ('tx_lpi_timer', ctypes.c_uint32),
+            ('reserved1', ctypes.c_uint32),
+            ('reserved2', ctypes.c_uint32),
+    ]
+
+
 class ethtool_value(ctypes.Structure):
     _pack_ = 1
     _fields_ = [
@@ -126,6 +142,7 @@ class ifr_data(ctypes.Union):
     _fields_ = [
             ('ethtool_cmd_ptr', ctypes.POINTER(ethtool_cmd)),
             ('ethtool_value_ptr', ctypes.POINTER(ethtool_value)),
+            ('ethtool_eee_ptr', ctypes.POINTER(ethtool_eee)),
     ]
 
 
@@ -242,6 +259,10 @@ class EthTool:
     AUTONEG_DISABLE = 0x00
     AUTONEG_ENABLE = 0x01
 
+    # Enable or disable eee
+    EEE_DISABLE = 0x00
+    EEE_ENABLE = 0x01
+
     # MDI or MDI-X status/control - if MDI/MDI_X/AUTO is set then
     #  the driver is required to renegotiate link
 
@@ -313,6 +334,13 @@ class EthTool:
         self._name = (ctypes.c_ubyte *
                       IFNAMSIZ)(*bytearray(str(ifname).encode()))
 
+    def _ifreq_eee(self):
+        ifr = ifreq()
+        ecmd = ethtool_eee()
+        ifr.ifr_data.ethtool_eee_ptr = ctypes.pointer(ecmd)
+        ifr.ifr_name = self._name  # noqa pylint: disable=attribute-defined-outside-init
+        return ifr, ecmd
+
     def _ifreq_ecmd(self):
         ifr = ifreq()
         ecmd = ethtool_cmd()
@@ -340,6 +368,19 @@ class EthTool:
 
         return self._dump_ecmd(ecmd)
 
+    def get_eee(self):
+        ifr, ecmd = self._ifreq_eee()
+
+        ecmd.cmd = ETHTOOL_GEEE  # noqa pylint: disable=attribute-defined-outside-init
+        try:
+            fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
+        except OSError as exc:
+            if exc.errno == 95:
+                return None
+            raise
+
+        return self._dump_eee(ecmd)
+
     def link_detected(self):
         ifr, evalue = self._ifreq_value()
 
@@ -351,6 +392,26 @@ class EthTool:
             if exc.errno == 45:
                 return False
             raise
+
+    def enable_eee(self):
+        ifr, ecmd = self._ifreq_eee()
+
+        ecmd.cmd = ETHTOOL_GEEE  # noqa pylint: disable=attribute-defined-outside-init
+        fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
+
+        ecmd.cmd = ETHTOOL_SEEE  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.eee_enabled = self.EEE_ENABLE  # noqa pylint: disable=attribute-defined-outside-init
+        fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
+
+    def disable_eee(self):
+        ifr, ecmd = self._ifreq_eee()
+
+        ecmd.cmd = ETHTOOL_GEEE  # noqa pylint: disable=attribute-defined-outside-init
+        fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
+
+        ecmd.cmd = ETHTOOL_SEEE  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.eee_enabled = self.EEE_DISABLE  # noqa pylint: disable=attribute-defined-outside-init
+        fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
 
     def enable_autoneg(self):
         ifr, ecmd = self._ifreq_ecmd()
@@ -369,7 +430,7 @@ class EthTool:
         fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
 
         ecmd.cmd = ETHTOOL_SSET  # noqa pylint: disable=attribute-defined-outside-init
-        ecmd.autoneg = self.AUTONEG_DISABLE
+        ecmd.autoneg = self.AUTONEG_DISABLE  # noqa pylint: disable=attribute-defined-outside-init
         ecmd.speed = speed  # noqa pylint: disable=attribute-defined-outside-init
         ecmd.duplex = duplex  # noqa pylint: disable=attribute-defined-outside-init
         fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
@@ -475,5 +536,15 @@ class EthTool:
             settings['autoneg'] = False
         else:
             settings['autoneg'] = True
+
+        return settings
+
+    def _dump_eee(self, ep):
+        settings = {}
+        settings["supported"] = self._dump_supported(ep.supported)
+        settings["advertised"] = self._dump_advertised(ep.advertised)
+        settings["link_partner"] = self._dump_advertised(ep.lp_advertised)
+        settings["enabled"] = bool(ep.eee_enabled)
+        settings["active"] = bool(ep.eee_active)
 
         return settings
