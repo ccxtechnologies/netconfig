@@ -397,7 +397,13 @@ class EthTool:
         ifr, ecmd = self._ifreq_eee()
 
         ecmd.cmd = ETHTOOL_GEEE  # noqa pylint: disable=attribute-defined-outside-init
-        fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
+        try:
+            fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
+        except OSError as exc:
+            if exc.errno == 95:
+                # operation not supported
+                return
+            raise
 
         ecmd.cmd = ETHTOOL_SEEE  # noqa pylint: disable=attribute-defined-outside-init
         ecmd.eee_enabled = self.EEE_ENABLE  # noqa pylint: disable=attribute-defined-outside-init
@@ -407,7 +413,13 @@ class EthTool:
         ifr, ecmd = self._ifreq_eee()
 
         ecmd.cmd = ETHTOOL_GEEE  # noqa pylint: disable=attribute-defined-outside-init
-        fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
+        try:
+            fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
+        except OSError as exc:
+            if exc.errno == 95:
+                # operation not supported
+                return
+            raise
 
         ecmd.cmd = ETHTOOL_SEEE  # noqa pylint: disable=attribute-defined-outside-init
         ecmd.eee_enabled = self.EEE_DISABLE  # noqa pylint: disable=attribute-defined-outside-init
