@@ -169,7 +169,7 @@ class ifreq(ctypes.Structure):
 def mdio_read_reg(ifname, reg):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         ifr = ifreq()
-        ifr.ifr_name = (ctypes.c_ubyte * 16)(*bytearray(ifname.encode()))
+        ifr.ifr_name = (ctypes.c_ubyte * 16)(*bytearray(ifname.encode()))  # noqa pylint: disable=attribute-defined-outside-init
         fcntl.ioctl(sock, SIOCGMIIPHY, ifr)
         ifr.data.reg_num = reg
         fcntl.ioctl(sock, SIOCGMIIPHY, ifr)
