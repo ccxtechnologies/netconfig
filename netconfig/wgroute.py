@@ -5,6 +5,7 @@ import asyncio
 
 from functools import partial
 from pyroute2 import WireGuard  # noqa pylint: disable=no-name-in-module, import-error
+from typing import Any
 
 
 class WGRoute:
@@ -47,7 +48,7 @@ class WGRoute:
                     self.executor, partial(self._info, ifname, ifindex)
             )
 
-    def get_attr(self, attr_name: str, attrs) -> object:
+    def get_attr(self, attr_name: str, attrs) -> Any:
         if attrs is None:
             return None
 
