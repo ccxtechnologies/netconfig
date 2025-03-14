@@ -13,6 +13,7 @@ from pyroute2.netlink.exceptions import NetlinkError
 
 from pyroute2 import IW
 # noqa pylint: enable=no-name-in-module, import-error
+from typing import Optional
 
 
 class IWRoute:
@@ -122,9 +123,8 @@ class IWRoute:
                     self.executor, partial(self._get_id, phy_id, device_name)
             )
 
-    async def add_device(
-            self, phy_id: int, device_name: str, device_type
-    ) -> int:
+    async def add_device(self, phy_id: int, device_name: str,
+                         device_type) -> Optional[int]:
         """
         device_type can be:
             1. adhoc
@@ -141,7 +141,7 @@ class IWRoute:
         """
 
         if not device_name or not device_type:
-            return
+            return None
 
         async with self.lock:
             return await self.loop.run_in_executor(
