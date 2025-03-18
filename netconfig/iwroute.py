@@ -124,7 +124,7 @@ class IWRoute:
 
     async def add_device(
             self, phy_id: int, device_name: str, device_type
-    ) -> int:
+    ) -> int | None:
         """
         device_type can be:
             1. adhoc
@@ -141,7 +141,7 @@ class IWRoute:
         """
 
         if not device_name or not device_type:
-            return
+            return None
 
         async with self.lock:
             return await self.loop.run_in_executor(
