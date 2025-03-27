@@ -47,7 +47,7 @@ class WGRoute:
                     self.executor, partial(self._info, ifname, ifindex)
             )
 
-    def get_attr(self, attr_name: str, attrs) -> Any:
+    def get_attr(self, attr_name: str, attrs) -> object:
         if attrs is None:
             return None
 
