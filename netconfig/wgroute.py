@@ -5,7 +5,6 @@ import asyncio
 
 from functools import partial
 from pyroute2 import WireGuard  # noqa pylint: disable=no-name-in-module, import-error
-from typing import Any
 
 
 class WGRoute:
