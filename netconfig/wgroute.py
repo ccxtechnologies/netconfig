@@ -74,8 +74,10 @@ class WGRoute:
 
         return _nested_values(attr_name, attrs)
 
-    def get_nested(self, attr_names: tuple, attrs: dict) -> object:
-        _attrs = attrs
+    def get_nested(
+            self, attr_names: tuple, attrs: list | dict | tuple
+    ) -> object:
+        _attrs: object = attrs
 
         for attr_name in attr_names:
             _attrs = self.get_attr(attr_name, _attrs)
