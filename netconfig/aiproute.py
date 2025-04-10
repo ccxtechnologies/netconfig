@@ -436,9 +436,9 @@ class AIPRoute():
 
     async def add_device(
             self, device_name: str, device_type: str, **kwargs
-    ) -> int:
+    ) -> int | None:
         if not device_name or not device_type:
-            return
+            return None
 
         async with self.lock:
             return await self.loop.run_in_executor(
