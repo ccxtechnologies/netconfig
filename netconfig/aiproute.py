@@ -82,11 +82,13 @@ class AIPRoute():
         except (IndexError, KeyError):
             return None
 
-    def _get_arp_cache(self, device_id: int, stale_timeout: int = 60) -> dict:
+    def _get_arp_cache(
+            self, device_id: int, stale_timeout: int = 60
+    ) -> dict | None:
         try:
             response = self.ipr.get_neighbours(ifindex=device_id)
         except NetlinkError:
-            return False
+            return None
 
         cache = {}
         for r in response:
