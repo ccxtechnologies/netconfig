@@ -175,9 +175,7 @@ class AIPRoute():
         except (OSError, NetlinkError):
             raise RuntimeError(f"Failed to set {device_id} stp to {stp}")
 
-    def _add_device(
-            self, device_name: str, device_type: str, **kwargs
-    ) -> None:
+    def _add_device(self, device_name: str, device_type: str, **kwargs) -> int:
         try:
             self.ipr.link(
                     'add', ifname=device_name, kind=device_type, **kwargs
