@@ -32,7 +32,7 @@ async def arpreq(
         if type(loop) == asyncio.unix_events._UnixSelectorEventLoop:  # noqa pylint:disable=protected-access
             reader = asyncio.streams.StreamReader(loop=loop)
             protocol = asyncio.streams.StreamReaderProtocol(reader, loop=loop)
-            await loop._create_connection_transport(  # noqa pylint:disable=protected-access
+            await loop._create_connection_transport(  # type: ignore [attr-defined] # noqa pylint:disable=protected-access
                     _socket, lambda: protocol, None, ''
             )
 
