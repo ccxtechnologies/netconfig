@@ -36,21 +36,21 @@ async def arpreq(
                     _socket, lambda: protocol, None, ''
             )
 
-        frame = b''.join(
-                [
-                        pack('!6B',
-                             *(0xFF, ) * 6),
-                        _socket.getsockname()[4],
-                        pack('!H', 0x0806),
-                        pack('!HHBB', 0x0001, 0x0800, 0x0006, 0x0004),
-                        pack('!H', 0x0001),
-                        _socket.getsockname()[4],
-                        pack('!4B', *src_ipaddr.words),
-                        pack('!6B',
-                             *(0, ) * 6),
-                        pack('!4B', *dst_ipaddr.words)
-                ]
-        )
+        frame_list = [
+                pack('!6B',
+                     *(0xFF, ) * 6),
+                _socket.getsockname()[4],
+                pack('!H', 0x0806),
+                pack('!HHBB', 0x0001, 0x0800, 0x0006, 0x0004),
+                pack('!H', 0x0001),
+                _socket.getsockname()[4],
+                pack('!4B', *src_ipaddr.words),
+                pack('!6B',
+                     *(0, ) * 6),
+                pack('!4B', *dst_ipaddr.words)
+        ]
+
+        frame: bytes = b''.join(frame_list)
 
         _socket.send(frame)
         send_time = time.time()
