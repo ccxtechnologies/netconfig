@@ -1,20 +1,20 @@
 # Copyright: 2020-2025, CCX Technologies
 
 import asyncio
-import netaddr
 import time
+from functools import partial
+import netaddr
 from pyroute2 import IPRoute  # noqa pylint: disable=no-name-in-module, import-error
 try:
     from pyroute2 import IPLinkRequest
 except ImportError:
     IPLinkRequest = dict
 from pyroute2.netlink.exceptions import NetlinkError
-from functools import partial
 
 # =================== from linux headers ========================
 
-IFF_UP = (1 << 0)
-IFF_LOWER_UP = (1 << 16)
+IFF_UP = 1 << 0
+IFF_LOWER_UP = 1 << 16
 
 
 class AIPRoute():
@@ -91,11 +91,11 @@ class AIPRoute():
             return None
 
         cache = {}
-        for r in response:
+        for neighbour in response:
             mac = None
             address = None
             confirmed_secs = None
-            for name, value in r['attrs']:
+            for name, value in neighbour['attrs']:
                 if name == "NDA_DST":
                     address = value
                 elif name == "NDA_LLADDR":
@@ -143,13 +143,13 @@ class AIPRoute():
                     raise RuntimeError(
                             f"Failed to add {device_id}"
                             f" to bridge {master_id}: {exc}"
-                    )
+                    ) from exc
 
             except OSError as exc:
                 raise RuntimeError(
                         f"Failed to add {device_id} to bridge"
                         f" {master_id}: {exc}"
-                )
+                ) from exc
 
             else:
                 break
@@ -172,8 +172,10 @@ class AIPRoute():
                     )
             )
 
-        except (OSError, NetlinkError):
-            raise RuntimeError(f"Failed to set {device_id} stp to {stp}")
+        except (OSError, NetlinkError) as exc:
+            raise RuntimeError(
+                    f"Failed to set {device_id} stp to {stp}"
+            ) from exc
 
     def _add_device(self, device_name: str, device_type: str, **kwargs) -> int:
         try:
@@ -185,7 +187,8 @@ class AIPRoute():
                 raise FileExistsError(
                         f"Device {device_name} already exists"
                 ) from exc
-            elif exc.code == 16:
+
+            if exc.code == 16:
                 # device busy
                 time.sleep(2)
                 self.ipr.link(
@@ -280,6 +283,9 @@ class AIPRoute():
                 else:
                     raise
 
+    def _set_name(self, device_id: int, name: str) -> None:
+        self.ipr.link('set', index=device_id, ifname=name)
+
     def _flush_rules(self, **kwargs) -> None:
         try:
             self.ipr.flush_rules(**kwargs)
@@ -299,7 +305,9 @@ class AIPRoute():
             if exc.code == 17:
                 pass
             else:
-                raise RuntimeError(f"Failed to add rule {kwargs}: {exc}")
+                raise RuntimeError(
+                        f"Failed to add rule {kwargs}: {exc}"
+                ) from exc
 
     def _flush_routes(self, **kwargs) -> None:
         try:
@@ -327,9 +335,13 @@ class AIPRoute():
                                 f"Route {kwargs} already exists"
                         ) from exce
 
-                    raise RuntimeError(f"Failed to add route {kwargs}: {exce}")
+                    raise RuntimeError(
+                            f"Failed to add route {kwargs}: {exce}"
+                    ) from exce
             else:
-                raise RuntimeError(f"Failed to add route {kwargs}: {exc}")
+                raise RuntimeError(
+                        f"Failed to add route {kwargs}: {exc}"
+                ) from exc
 
     def _replace_tc(
             self, kind: str, device_id: int, handle: int, **kwargs
@@ -351,7 +363,7 @@ class AIPRoute():
         try:
             routine(self.ipr)
         except NetlinkError as exc:
-            raise RuntimeError(f"Netlink error in {routine}: {exc}")
+            raise RuntimeError(f"Netlink error in {routine}: {exc}") from exc
 
     def get_attr(self, attr_name: str, attrs) -> object:
         if attrs is None:
@@ -360,7 +372,7 @@ class AIPRoute():
         def _nested_values(attr_name, _attrs):
             values = []
 
-            if isinstance(_attrs, list) or isinstance(_attrs, tuple):
+            if isinstance(_attrs, (list, tuple)):
                 for _attr in _attrs:
                     value = _nested_values(attr_name, _attr)
                     if value:
@@ -373,10 +385,9 @@ class AIPRoute():
 
             if not values:
                 return None
-            elif len(values) == 1:
+            if len(values) == 1:
                 return values[0]
-            else:
-                return values
+            return values
 
         return _nested_values(attr_name, attrs)
 
@@ -506,6 +517,15 @@ class AIPRoute():
                     )
             )
         return new_address
+
+    async def set_name(self, device_id: int, name: str) -> None:
+        if not name:
+            return
+
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor, partial(self._set_name, device_id, name)
+            )
 
     async def set_mtu(self, device_id: int, mtu: int) -> None:
         if device_id <= 0 or mtu <= 0:
