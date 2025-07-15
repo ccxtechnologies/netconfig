@@ -283,9 +283,6 @@ class AIPRoute():
                 else:
                     raise
 
-    def _set_name(self, device_id: int, name: str) -> None:
-        self.ipr.link('set', index=device_id, ifname=name)
-
     def _flush_rules(self, **kwargs) -> None:
         try:
             self.ipr.flush_rules(**kwargs)
@@ -517,15 +514,6 @@ class AIPRoute():
                     )
             )
         return new_address
-
-    async def set_name(self, device_id: int, name: str) -> None:
-        if not name:
-            return
-
-        async with self.lock:
-            await self.loop.run_in_executor(
-                    self.executor, partial(self._set_name, device_id, name)
-            )
 
     async def set_mtu(self, device_id: int, mtu: int) -> None:
         if device_id <= 0 or mtu <= 0:
