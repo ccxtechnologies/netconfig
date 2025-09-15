@@ -60,9 +60,6 @@ async def monitor_state_change(queues):
             )
 
         while True:
-            # NOTE: There is a bug in the stock asyncio library and this
-            # will this will only work with uvloop, refer to an older
-            # version based on loop._create_connection_transport
             try:
                 if isinstance(
                         loop,
