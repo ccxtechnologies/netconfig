@@ -4,7 +4,7 @@ import asyncio
 import time
 from functools import partial
 import netaddr
-from pyroute2 import IPRoute  # noqa pylint: disable=no-name-in-module, import-error
+from pyroute2 import AsyncIPRoute  # noqa pylint: disable=no-name-in-module, import-error
 try:
     from pyroute2 import IPLinkRequest
 except ImportError:
@@ -24,23 +24,23 @@ class AIPRoute():
     def __init__(self, loop=None, executor=None):
         self.loop = asyncio.get_event_loop() if loop is None else loop
         self.executor = executor
-        self.ipr = IPRoute()
+        self.ipr = AsyncIPRoute()
         self.lock = asyncio.Lock()
 
     def close(self):
         if not self.ipr.closed:
             self.ipr.close()
 
-    def _get_id(self, device_name: str) -> int:
+    async def _get_id(self, device_name: str) -> int:
         try:
-            device_ids = self.ipr.link_lookup(ifname=device_name)
+            device_ids = await self.ipr.link_lookup(ifname=device_name)
 
         except OSError as exc:
             # sometimes calling this will lose the link for some reason
             if exc.errno == 9:
                 self.ipr.close()
-                self.ipr = IPRoute()
-                device_ids = self.ipr.link_lookup(ifname=device_name)
+                self.ipr = AsyncIPRoute()
+                device_ids = await self.ipr.link_lookup(ifname=device_name)
 
         try:
             return device_ids[0]
@@ -401,10 +401,7 @@ class AIPRoute():
         if not device_name:
             return 0
 
-        async with self.lock:
-            return await self.loop.run_in_executor(
-                    self.executor, partial(self._get_id, device_name)
-            )
+        return await self._get_id(device_name)
 
     async def get_name(self, device_id: int) -> str:
         if device_id <= 0:
