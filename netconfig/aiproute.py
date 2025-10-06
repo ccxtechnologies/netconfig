@@ -82,11 +82,11 @@ class AIPRoute():
         except (IndexError, KeyError):
             return None
 
-    def _get_arp_cache(
+    async def _get_arp_cache(
             self, device_id: int, stale_timeout: int = 60
     ) -> dict | None:
         try:
-            response = self.ipr.get_neighbours(ifindex=device_id)
+            response = await self.ipr.get_neighbours(ifindex=device_id)
         except NetlinkError:
             return None
 
@@ -207,27 +207,29 @@ class AIPRoute():
 
         return _id
 
-    def _flush_address(self, device_id) -> None:
-        self.ipr.flush_addr(index=device_id)
+    async def _flush_address(self, device_id) -> None:
+        await self.ipr.flush_addr(index=device_id)
 
-    def _set_address(self, device_id: int, address: netaddr.IPNetwork) -> None:
-        self.ipr.flush_addr(index=device_id)
+    async def _set_address(
+            self, device_id: int, address: netaddr.IPNetwork
+    ) -> None:
+        await self.ipr.flush_addr(index=device_id)
 
         if bool(address.ip) and bool(address.prefixlen):
-            self.ipr.addr(
+            await self.ipr.addr(
                     'add',
                     index=device_id,
                     address=str(address.ip),
                     mask=address.prefixlen
             )
 
-    def _replace_address(
+    async def _replace_address(
             self, device_id: int, old_address: netaddr.IPNetwork,
             new_address: netaddr.IPNetwork
     ) -> None:
         if bool(old_address.ip) and bool(old_address.prefixlen):
             try:
-                self.ipr.addr(
+                await self.ipr.addr(
                         'del',
                         index=device_id,
                         address=str(old_address.ip),
@@ -239,7 +241,7 @@ class AIPRoute():
                 pass
 
         if bool(new_address.ip) and bool(new_address.prefixlen):
-            self.ipr.addr(
+            await self.ipr.addr(
                     'add',
                     index=device_id,
                     address=str(new_address.ip),
@@ -473,19 +475,14 @@ class AIPRoute():
             return
 
         async with self.lock:
-            await self.loop.run_in_executor(
-                    self.executor,
-                    partial(self._set_address, device_id, address)
-            )
+            await self._set_address(device_id, address)
 
     async def flush_address(self, device_id: int) -> None:
         if device_id <= 0:
             return
 
         async with self.lock:
-            await self.loop.run_in_executor(
-                    self.executor, partial(self._flush_address, device_id)
-            )
+            await self._flush_address(device_id)
 
     async def replace_address(
             self, device_id: int, old_address: netaddr.IPNetwork,
@@ -495,13 +492,8 @@ class AIPRoute():
             return netaddr.IPNetwork('0.0.0.0/0')
 
         async with self.lock:
-            await self.loop.run_in_executor(
-                    self.executor,
-                    partial(
-                            self._replace_address, device_id, old_address,
-                            new_address
-                    )
-            )
+            await self._replace_address(device_id, old_address, new_address)
+
         return new_address
 
     async def set_mtu(self, device_id: int, mtu: int) -> None:
@@ -539,10 +531,7 @@ class AIPRoute():
             return None
 
         async with self.lock:
-            return await self.loop.run_in_executor(
-                    self.executor,
-                    partial(self._get_arp_cache, device_id, stale_timeout)
-            )
+            return await self._get_arp_cache(device_id, stale_timeout)
 
     async def flush_rules(self, **kwargs) -> None:
         async with self.lock:
