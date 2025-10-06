@@ -109,9 +109,9 @@ class AIPRoute():
 
         return cache
 
-    def _delete_device(self, device_name: str) -> None:
+    async def _delete_device(self, device_name: str) -> None:
         try:
-            self.ipr.link('del', ifname=device_name)
+            await self.ipr.link('del', ifname=device_name)
         except NetlinkError as exc:
             if exc.code == 19:
                 # if it doesn't exist that's okay
@@ -124,17 +124,16 @@ class AIPRoute():
                 raise
         else:
             for _ in range(0, 10):
-                _id = self._get_id(device_name)
+                _id = await self._get_id(device_name)
                 if not _id:
                     break
             else:
                 raise RuntimeError(f"Failed to remove {device_name}")
 
-    def _set_master(self, device_id: int, master_id: int) -> None:
-
+    async def _set_master(self, device_id: int, master_id: int) -> None:
         for i in range(0, 10):
             try:
-                self.ipr.link('set', index=device_id, master=master_id)
+                await self.ipr.link('set', index=device_id, master=master_id)
 
             except NetlinkError as exc:
                 if exc.code == 16:  # device busy
@@ -159,9 +158,9 @@ class AIPRoute():
         else:
             raise RuntimeError(f"Device busy in {i} attempts")
 
-    def _set_stp(self, device_id: int, stp: int) -> None:
+    async def _set_stp(self, device_id: int, stp: int) -> None:
         try:
-            self.ipr.link(
+            await self.ipr.link(
                     'set',
                     **IPLinkRequest(
                             {
@@ -177,9 +176,11 @@ class AIPRoute():
                     f"Failed to set {device_id} stp to {stp}"
             ) from exc
 
-    def _add_device(self, device_name: str, device_type: str, **kwargs) -> int:
+    async def _add_device(
+            self, device_name: str, device_type: str, **kwargs
+    ) -> int:
         try:
-            self.ipr.link(
+            await self.ipr.link(
                     'add', ifname=device_name, kind=device_type, **kwargs
             )
         except NetlinkError as exc:
@@ -191,14 +192,14 @@ class AIPRoute():
             if exc.code == 16:
                 # device busy
                 time.sleep(2)
-                self.ipr.link(
+                await self.ipr.link(
                         'add', ifname=device_name, kind=device_type, **kwargs
                 )
             else:
                 raise
 
         for _ in range(0, 10):
-            _id = self._get_id(device_name)
+            _id = await self._get_id(device_name)
             if _id:
                 break
         else:
@@ -261,32 +262,31 @@ class AIPRoute():
 
         existing_mac = netaddr.EUI(addr)
         if existing_mac != mac:
-            self.ipr.link('set', index=device_id, address=str(mac))
+            await self.ipr.link('set', index=device_id, address=str(mac))
 
-    def _set_device_name(self, device_id: int, device_name: str) -> None:
+    async def _set_device_name(self, device_id: int, device_name: str) -> None:
         if not device_name:
             return
 
         try:
-            self.ipr.link("set", index=device_id, ifname=device_name)
+            await self.ipr.link("set", index=device_id, ifname=device_name)
         except NetlinkError as exc:
             if exc.code == 16:
                 # device busy
                 time.sleep(2)
-                self.ipr.link("set", index=device_id, ifname=device_name)
+                await self.ipr.link("set", index=device_id, ifname=device_name)
             else:
                 raise
 
-    def _set_mtu(self, device_id: int, mtu: int) -> None:
-        self.ipr.link('set', index=device_id, mtu=mtu)
+    async def _set_mtu(self, device_id: int, mtu: int) -> None:
+        await self.ipr.link('set', index=device_id, mtu=mtu)
 
-    def _set_up(self, device_id: int, state: bool) -> None:
+    async def _set_up(self, device_id: int, state: bool) -> None:
         if state:
-            self.ipr.link('set', index=device_id, state='up')
+            await self.ipr.link('set', index=device_id, state='up')
         else:
             try:
-                self.ipr.link('set', index=device_id, state='down')
-
+                await self.ipr.link('set', index=device_id, state='down')
             except NetlinkError as exc:
                 if exc.code == 19:
                     # if device doesn't exist ignore
@@ -441,9 +441,7 @@ class AIPRoute():
             return
 
         async with self.lock:
-            await self.loop.run_in_executor(
-                    self.executor, partial(self._delete_device, device_name)
-            )
+            await self._delete_device(device_name)
 
     async def add_device(
             self, device_name: str, device_type: str, **kwargs
@@ -452,33 +450,21 @@ class AIPRoute():
             return None
 
         async with self.lock:
-            return await self.loop.run_in_executor(
-                    self.executor,
-                    partial(
-                            self._add_device, device_name, device_type,
-                            **kwargs
-                    )
-            )
+            return await self._add_device(device_name, device_type, **kwargs)
 
     async def set_master(self, device_id: int, master_id: int) -> None:
         if device_id <= 0 or master_id < 0:
             return
 
         async with self.lock:
-            await self.loop.run_in_executor(
-                    self.executor,
-                    partial(self._set_master, device_id, master_id)
-            )
+            await self._set_master(device_id, master_id)
 
     async def set_stp(self, device_id: int, stp: bool) -> None:
         if device_id <= 0:
             return
 
         async with self.lock:
-            await self.loop.run_in_executor(
-                    self.executor,
-                    partial(self._set_stp, device_id, 1 if stp else 0)
-            )
+            await self._set_stp(device_id, 1 if stp else 0)
 
     async def set_address(
             self, device_id: int, address: netaddr.IPNetwork
@@ -523,9 +509,7 @@ class AIPRoute():
             return
 
         async with self.lock:
-            await self.loop.run_in_executor(
-                    self.executor, partial(self._set_mtu, device_id, mtu)
-            )
+            await self._set_mtu(device_id, mtu)
 
     async def set_mac(self, device_id: int, mac: netaddr.EUI) -> None:
         if device_id <= 0:
@@ -539,19 +523,14 @@ class AIPRoute():
             return
 
         async with self.lock:
-            await self.loop.run_in_executor(
-                    self.executor,
-                    partial(self._set_device_name, device_id, device_name)
-            )
+            await self._set_device_name(device_id, device_name)
 
     async def set_up(self, device_id: int, state: bool) -> None:
         if device_id <= 0:
             return
 
         async with self.lock:
-            await self.loop.run_in_executor(
-                    self.executor, partial(self._set_up, device_id, state)
-            )
+            await self._set_up(device_id, state)
 
     async def get_arp_cache(
             self, device_id: int, stale_timeout: int = 60
