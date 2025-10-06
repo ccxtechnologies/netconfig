@@ -49,7 +49,7 @@ class AIPRoute():
 
     async def _get_name(self, device_id: int) -> str:
         try:
-            links = await self.ipr.get_links(device_id)
+            links = [i async for i in await self.ipr.get_links(device_id)]
         except NetlinkError:
             return None
 
@@ -58,9 +58,9 @@ class AIPRoute():
         except (IndexError, KeyError):
             return None
 
-    def _get_up(self, device_id: int) -> bool:
+    async def _get_up(self, device_id: int) -> bool:
         try:
-            links = self.ipr.get_links(device_id)
+            links = [i async for i in await self.ipr.get_links(device_id)]
         except NetlinkError:
             return False
 
@@ -245,9 +245,9 @@ class AIPRoute():
                     mask=new_address.prefixlen
             )
 
-    def _set_mac(self, device_id: int, mac: netaddr.EUI) -> None:
+    async def _set_mac(self, device_id: int, mac: netaddr.EUI) -> None:
         if mac:
-            info = self.ipr.get_links(device_id)[0]
+            info = [i async for i in await self.ipr.get_links(device_id)][0]
             existing_mac = netaddr.EUI(info.get_attr("IFLA_ADDRESS"))
             if existing_mac != mac:
                 self.ipr.link('set', index=device_id, address=str(mac))
@@ -411,14 +411,12 @@ class AIPRoute():
         async with self.lock:
             return await self._get_name(device_id)
 
-    async def get_up(self, device_id: int) -> str:
+    async def get_up(self, device_id: int) -> bool:
         if device_id <= 0:
             return None
 
         async with self.lock:
-            return await self.loop.run_in_executor(
-                    self.executor, partial(self._get_up, device_id)
-            )
+            return await self._get_up(device_id)
 
     async def get_stats(self, device_id: int) -> str:
         if device_id <= 0:
@@ -525,9 +523,7 @@ class AIPRoute():
             return
 
         async with self.lock:
-            await self.loop.run_in_executor(
-                    self.executor, partial(self._set_mac, device_id, mac)
-            )
+            await self._set_mac(device_id, mac)
 
     async def set_device_name(self, device_id: int, device_name: str) -> None:
         if device_id <= 0:
