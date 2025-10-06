@@ -319,15 +319,15 @@ class AIPRoute():
                         f"Failed to add rule {kwargs}: {exc}"
                 ) from exc
 
-    def _flush_routes(self, **kwargs) -> None:
+    async def _flush_routes(self, **kwargs) -> None:
         try:
-            self.ipr.flush_routes(**kwargs)
+            await self.ipr.flush_routes(**kwargs)
         except (OSError, NetlinkError):
             pass
 
-    def _delete_route(self, **kwargs) -> None:
+    async def _delete_route(self, **kwargs) -> None:
         try:
-            self.ipr.route('delete', **kwargs)
+            await self.ipr.route('delete', **kwargs)
         except NetlinkError:
             pass
 
@@ -371,9 +371,9 @@ class AIPRoute():
     ) -> None:
         await self.ipr.tc("add-filter", kind, device_id, **kwargs)
 
-    def _run_routine(self, routine):
+    async def _run_routine(self, routine):
         try:
-            routine(self.ipr)
+            await routine(self.ipr)
         except NetlinkError as exc:
             raise RuntimeError(f"Netlink error in {routine}: {exc}") from exc
 
@@ -549,15 +549,11 @@ class AIPRoute():
 
     async def flush_routes(self, **kwargs) -> None:
         async with self.lock:
-            await self.loop.run_in_executor(
-                    self.executor, partial(self._flush_routes, **kwargs)
-            )
+            await self._flush_routes(**kwargs)
 
     async def delete_route(self, **kwargs) -> None:
         async with self.lock:
-            await self.loop.run_in_executor(
-                    self.executor, partial(self._delete_route, **kwargs)
-            )
+            await self._delete_route(**kwargs)
 
     async def add_route(self, **kwargs) -> None:
         async with self.lock:
@@ -587,6 +583,4 @@ class AIPRoute():
 
     async def run_routine(self, routine):
         async with self.lock:
-            return await self.loop.run_in_executor(
-                    self.executor, partial(self._run_routine, routine)
-            )
+            await self._run_routine(routine)
