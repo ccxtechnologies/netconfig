@@ -71,9 +71,9 @@ class AIPRoute():
 
         return (ifi_flags & (IFF_UP | IFF_LOWER_UP)) == (IFF_UP | IFF_LOWER_UP)
 
-    def _get_stats(self, device_id: int) -> bool:
+    async def _get_stats(self, device_id: int) -> str:
         try:
-            stats = self.ipr.stats("get", ifindex=device_id)
+            stats = await self.ipr.stats("get", ifindex=device_id)
         except NetlinkError:
             return None
 
@@ -434,9 +434,7 @@ class AIPRoute():
             return None
 
         async with self.lock:
-            return await self.loop.run_in_executor(
-                    self.executor, partial(self._get_stats, device_id)
-            )
+            return await self._get_stats(device_id)
 
     async def delete_device(self, device_name: str) -> None:
         if not device_name:
