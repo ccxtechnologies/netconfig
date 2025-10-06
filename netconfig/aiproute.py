@@ -246,11 +246,22 @@ class AIPRoute():
             )
 
     async def _set_mac(self, device_id: int, mac: netaddr.EUI) -> None:
-        if mac:
-            info = [i async for i in await self.ipr.get_links(device_id)][0]
-            existing_mac = netaddr.EUI(info.get_attr("IFLA_ADDRESS"))
-            if existing_mac != mac:
-                self.ipr.link('set', index=device_id, address=str(mac))
+        if not mac:
+            return
+
+        try:
+            links = [i async for i in await self.ipr.get_links(device_id)]
+        except NetlinkError:
+            return
+
+        try:
+            addr = links[0].get_attr('IFLA_ADDRESS')
+        except (IndexError, KeyError):
+            return
+
+        existing_mac = netaddr.EUI(addr)
+        if existing_mac != mac:
+            self.ipr.link('set', index=device_id, address=str(mac))
 
     def _set_device_name(self, device_id: int, device_name: str) -> None:
         if not device_name:
