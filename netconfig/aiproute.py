@@ -296,21 +296,21 @@ class AIPRoute():
                 else:
                     raise
 
-    def _flush_rules(self, **kwargs) -> None:
+    async def _flush_rules(self, **kwargs) -> None:
         try:
-            self.ipr.flush_rules(**kwargs)
+            await self.ipr.flush_rules(**kwargs)
         except (OSError, NetlinkError):
             pass
 
-    def _delete_rule(self, **kwargs) -> None:
+    async def _delete_rule(self, **kwargs) -> None:
         try:
-            self.ipr.rule('delete', **kwargs)
+            await self.ipr.rule('delete', **kwargs)
         except NetlinkError:
             pass
 
-    def _add_rule(self, **kwargs) -> None:
+    async def _add_rule(self, **kwargs) -> None:
         try:
-            self.ipr.rule('add', **kwargs)
+            await self.ipr.rule('add', **kwargs)
         except NetlinkError as exc:
             if exc.code == 17:
                 pass
@@ -353,21 +353,23 @@ class AIPRoute():
                         f"Failed to add route {kwargs}: {exc}"
                 ) from exc
 
-    def _replace_tc(
+    async def _replace_tc(
             self, kind: str, device_id: int, handle: int, **kwargs
     ) -> None:
-        self.ipr.tc("replace", kind, device_id, handle, **kwargs)
+        await self.ipr.tc("replace", kind, device_id, handle, **kwargs)
 
-    def _delete_tc(
+    async def _delete_tc(
             self, kind: str, device_id: int, handle: int, **kwargs
     ) -> None:
         try:
-            self.ipr.tc("del", kind, device_id, handle, **kwargs)
+            await self.ipr.tc("del", kind, device_id, handle, **kwargs)
         except NetlinkError:
             pass
 
-    def _add_filter_tc(self, kind: str, device_id: int, **kwargs) -> None:
-        self.ipr.tc("add-filter", kind, device_id, **kwargs)
+    async def _add_filter_tc(
+            self, kind: str, device_id: int, **kwargs
+    ) -> None:
+        await self.ipr.tc("add-filter", kind, device_id, **kwargs)
 
     def _run_routine(self, routine):
         try:
@@ -535,21 +537,15 @@ class AIPRoute():
 
     async def flush_rules(self, **kwargs) -> None:
         async with self.lock:
-            await self.loop.run_in_executor(
-                    self.executor, partial(self._flush_rules, **kwargs)
-            )
+            await self._flush_rules(**kwargs)
 
     async def delete_rule(self, **kwargs) -> None:
         async with self.lock:
-            await self.loop.run_in_executor(
-                    self.executor, partial(self._delete_rule, **kwargs)
-            )
+            await self._delete_rule(**kwargs)
 
     async def add_rule(self, **kwargs) -> None:
         async with self.lock:
-            await self.loop.run_in_executor(
-                    self.executor, partial(self._add_rule, **kwargs)
-            )
+            await self._add_rule(**kwargs)
 
     async def flush_routes(self, **kwargs) -> None:
         async with self.lock:
@@ -577,30 +573,17 @@ class AIPRoute():
             **kwargs
     ) -> None:
         async with self.lock:
-            await self.loop.run_in_executor(
-                    self.executor,
-                    partial(
-                            self._replace_tc, kind, device_id, handle, **kwargs
-                    )
-            )
+            await self._replace_tc(kind, device_id, handle, **kwargs)
 
     async def delete_tc(
             self, kind: str, device_id: int, handle: int, **kwargs
     ) -> None:
         async with self.lock:
-            await self.loop.run_in_executor(
-                    self.executor,
-                    partial(
-                            self._delete_tc, kind, device_id, handle, **kwargs
-                    )
-            )
+            await self._delete_tc(kind, device_id, handle, **kwargs)
 
     async def add_filter_tc(self, kind: str, device_id: int, **kwargs) -> None:
         async with self.lock:
-            await self.loop.run_in_executor(
-                    self.executor,
-                    partial(self._add_filter_tc, kind, device_id, **kwargs)
-            )
+            await self._add_filter_tc(kind, device_id, **kwargs)
 
     async def run_routine(self, routine):
         async with self.lock:
