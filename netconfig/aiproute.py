@@ -47,9 +47,9 @@ class AIPRoute():
         except IndexError:
             return 0
 
-    def _get_name(self, device_id: int) -> str:
+    async def _get_name(self, device_id: int) -> str:
         try:
-            links = self.ipr.get_links(device_id)
+            links = await self.ipr.get_links(device_id)
         except NetlinkError:
             return None
 
@@ -401,16 +401,15 @@ class AIPRoute():
         if not device_name:
             return 0
 
-        return await self._get_id(device_name)
+        async with self.lock:
+            return await self._get_id(device_name)
 
     async def get_name(self, device_id: int) -> str:
         if device_id <= 0:
             return None
 
         async with self.lock:
-            return await self.loop.run_in_executor(
-                    self.executor, partial(self._get_name, device_id)
-            )
+            return await self._get_name(device_id)
 
     async def get_up(self, device_id: int) -> str:
         if device_id <= 0:
