@@ -3,11 +3,7 @@
 import asyncio
 import time
 import netaddr
-from pyroute2 import AsyncIPRoute  # noqa pylint: disable=no-name-in-module, import-error
-try:
-    from pyroute2 import IPLinkRequest
-except ImportError:
-    IPLinkRequest = dict
+from pyroute2 import AsyncIPRoute
 from pyroute2.netlink.exceptions import NetlinkError
 
 # =================== from linux headers ========================
@@ -17,8 +13,6 @@ IFF_LOWER_UP = 1 << 16
 
 
 class AIPRoute():
-
-    NetlinkError = NetlinkError
 
     def __init__(self, loop=None, executor=None):
         self.ipr = AsyncIPRoute()
@@ -158,14 +152,7 @@ class AIPRoute():
     async def _set_stp(self, device_id: int, stp: int) -> None:
         try:
             await self.ipr.link(
-                    'set',
-                    **IPLinkRequest(
-                            {
-                                    'index': device_id,
-                                    'kind': 'bridge',
-                                    'br_stp_state': stp
-                            }
-                    )
+                    'set', index=device_id, kind='bridge', br_stp_state=stp
             )
 
         except (OSError, NetlinkError) as exc:
