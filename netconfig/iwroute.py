@@ -35,25 +35,25 @@ class IWRoute:
                 msg_flags=NLM_F_REQUEST | NLM_F_ACK
         )
 
-    def _get_phy_device_ids(self, phy_id):
+    async def _get_phy_device_ids(self, phy_id):
         return [
                 intf.get_attr('NL80211_ATTR_IFINDEX')
-                for intf in self.iw.get_interface_by_phy(phy_id)
+                for intf in await self.iw.get_interface_by_phy(phy_id)
         ]
 
-    def _get_id(self, phy_id, device_name):
+    async def _get_id(self, phy_id, device_name):
         for _id, _name in [
                 (
                         intf.get_attr('NL80211_ATTR_IFINDEX'),
                         intf.get_attr('NL80211_ATTR_IFNAME')
-                ) for intf in self.iw.get_interface_by_phy(phy_id)
+                ) for intf in await self.iw.get_interface_by_phy(phy_id)
         ]:
             if _name == device_name:
                 return _id
 
         return None
 
-    def _add_device(
+    async def _add_device(
             self, phy_id: int, device_name: str, device_type: str
     ) -> None:
         try:
@@ -69,7 +69,7 @@ class IWRoute:
                 raise
 
         for _ in range(0, 10):
-            _id = self._get_id(phy_id, device_name)
+            _id = await self._get_id(phy_id, device_name)
             if _id:
                 break
         else:
@@ -103,18 +103,14 @@ class IWRoute:
             return None
 
         async with self.lock:
-            return await self.loop.run_in_executor(
-                    self.executor, partial(self._get_phy_device_ids, phy_id)
-            )
+            return await self._get_phy_device_ids(phy_id)
 
     async def get_id(self, phy_id: int, device_name: str) -> int:
         if phy_id < 0 or not device_name:
             return None
 
         async with self.lock:
-            return await self.loop.run_in_executor(
-                    self.executor, partial(self._get_id, phy_id, device_name)
-            )
+            return await self._get_id(phy_id, device_name)
 
     async def add_device(
             self, phy_id: int, device_name: str, device_type
