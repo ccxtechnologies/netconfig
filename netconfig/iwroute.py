@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright: 2022, CCX Technologies
+# Copyright: 2022-2025, CCX Technologies
 
 import asyncio
 

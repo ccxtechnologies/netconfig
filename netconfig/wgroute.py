@@ -1,27 +1,26 @@
 #!/usr/bin/python
-# Copyright: 2020-2024, CCX Technologies
+# Copyright: 2020-2025, CCX Technologies
 
 import asyncio
 
-from functools import partial
-from pyroute2 import WireGuard  # noqa pylint: disable=no-name-in-module, import-error
+from pyroute2 import AsyncWireGuard
 
 
 class WGRoute:
 
     def __init__(self, loop=None, executor=None):
-        self.loop = asyncio.get_event_loop() if loop is None else loop
-        self.executor = executor
-        self.wg = WireGuard()
+        self.wg = AsyncWireGuard()
         self.lock = asyncio.Lock()
 
-    def _set(self, ifname, ifindex, listen_port, fwmark, private_key, peer):
-        return self.wg.set(
+    async def _set(
+            self, ifname, ifindex, listen_port, fwmark, private_key, peer
+    ):
+        return await self.wg.set(
                 ifname, ifindex, listen_port, fwmark, private_key, peer
         )
 
-    def _info(self, ifname, ifindex):
-        return self.wg.info(ifname, ifindex)
+    async def _info(self, ifname, ifindex):
+        return await self.wg.info(ifname, ifindex)
 
     async def set(
             self,
@@ -33,19 +32,13 @@ class WGRoute:
             peer=None,
     ):
         async with self.lock:
-            return await self.loop.run_in_executor(
-                    self.executor,
-                    partial(
-                            self._set, ifname, ifindex, listen_port, fwmark,
-                            private_key, peer
-                    )
+            return await self._set(
+                    ifname, ifindex, listen_port, fwmark, private_key, peer
             )
 
     async def info(self, ifname=None, ifindex=None):
         async with self.lock:
-            return await self.loop.run_in_executor(
-                    self.executor, partial(self._info, ifname, ifindex)
-            )
+            return await self._info(ifname, ifindex)
 
     def get_attr(self, attr_name: str, attrs) -> object:
         if attrs is None:
