@@ -2,7 +2,6 @@
 # Copyright: 2022, CCX Technologies
 
 import asyncio
-from functools import partial
 
 from pyroute2.netlink.nl80211 import nl80211cmd, NL80211_NAMES
 from pyroute2.netlink import NLM_F_ACK, NLM_F_REQUEST
@@ -14,8 +13,6 @@ from pyroute2 import AsyncIW
 class IWRoute:
 
     def __init__(self, loop=None, executor=None):
-        self.loop = asyncio.get_event_loop() if loop is None else loop
-        self.executor = executor
         self.iw = AsyncIW()
         self.lock = asyncio.Lock()
 
@@ -55,9 +52,9 @@ class IWRoute:
 
     async def _add_device(
             self, phy_id: int, device_name: str, device_type: str
-    ) -> None:
+    ) -> int | None:
         try:
-            self.iw.add_interface(
+            await self.iw.add_interface(
                     ifname=device_name, iftype=device_type, phy=phy_id
             )
         except NetlinkError as exc:
@@ -134,12 +131,7 @@ class IWRoute:
             return None
 
         async with self.lock:
-            return await self.loop.run_in_executor(
-                    self.executor,
-                    partial(
-                            self._add_device, phy_id, device_name, device_type
-                    )
-            )
+            return await self._add_device(phy_id, device_name, device_type)
 
     async def delete_device(self, device_id: int) -> None:
         if device_id <= 0:
@@ -147,10 +139,7 @@ class IWRoute:
 
         async with self.lock:
             try:
-                await self.loop.run_in_executor(
-                        self.executor,
-                        partial(self.iw.del_interface, device_id)
-                )
+                await self.iw.del_interface(device_id)
             except NetlinkError as exc:
                 if exc.code == 19:
                     # if it doesn't exist that's okay
@@ -161,9 +150,7 @@ class IWRoute:
             return
 
         async with self.lock:
-            return await self.loop.run_in_executor(
-                    self.executor, partial(self.iw.get_stations, device_id)
-            )
+            return await self.iw.get_stations(device_id)
 
     async def set_tx_power_limit(self, phy_id: int, tx_power_dbm: int) -> None:
         if phy_id < 0:
