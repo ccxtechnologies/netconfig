@@ -4,15 +4,11 @@
 import asyncio
 from functools import partial
 
-# noqa pylint: disable=no-name-in-module, import-error
-from pr2modules.netlink.nl80211 import nl80211cmd
-from pr2modules.netlink.nl80211 import NL80211_NAMES
-from pr2modules.netlink import NLM_F_ACK
-from pr2modules.netlink import NLM_F_REQUEST
+from pyroute2.netlink.nl80211 import nl80211cmd, NL80211_NAMES
+from pyroute2.netlink import NLM_F_ACK, NLM_F_REQUEST
 from pyroute2.netlink.exceptions import NetlinkError
 
-from pyroute2 import IW
-# noqa pylint: enable=no-name-in-module, import-error
+from pyroute2 import AsyncIW
 
 
 class IWRoute:
@@ -20,7 +16,7 @@ class IWRoute:
     def __init__(self, loop=None, executor=None):
         self.loop = asyncio.get_event_loop() if loop is None else loop
         self.executor = executor
-        self.iw = IW()
+        self.iw = AsyncIW()
         self.lock = asyncio.Lock()
 
     def _set_tx_power_limit(self, phy_id, tx_power_dbm):
