@@ -2,7 +2,6 @@
 
 import asyncio
 import time
-from functools import partial
 import netaddr
 from pyroute2 import AsyncIPRoute  # noqa pylint: disable=no-name-in-module, import-error
 try:
@@ -22,8 +21,6 @@ class AIPRoute():
     NetlinkError = NetlinkError
 
     def __init__(self, loop=None, executor=None):
-        self.loop = asyncio.get_event_loop() if loop is None else loop
-        self.executor = executor
         self.ipr = AsyncIPRoute()
         self.lock = asyncio.Lock()
 
@@ -331,14 +328,14 @@ class AIPRoute():
         except NetlinkError:
             pass
 
-    def _add_route(self, **kwargs) -> None:
+    async def _add_route(self, **kwargs) -> None:
         try:
-            self.ipr.route('add', **kwargs)
+            await self.ipr.route('add', **kwargs)
         except NetlinkError as exc:
             if exc.code == 17:
                 time.sleep(0.250)
                 try:
-                    self.ipr.route('add', **kwargs)
+                    await self.ipr.route('add', **kwargs)
                 except NetlinkError as exce:
                     if exce.code == 17:
                         raise FileExistsError(
@@ -557,9 +554,7 @@ class AIPRoute():
 
     async def add_route(self, **kwargs) -> None:
         async with self.lock:
-            await self.loop.run_in_executor(
-                    self.executor, partial(self._add_route, **kwargs)
-            )
+            await self._add_route(**kwargs)
 
     async def replace_tc(
             self,
