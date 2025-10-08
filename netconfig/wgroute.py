@@ -84,7 +84,7 @@ class WGRoute:
             return {}
 
         peers = {}
-        for msg in messages:
+        async for msg in messages:
             if msg.get_attr('WGDEVICE_A_PEERS') is None:
                 continue
 
