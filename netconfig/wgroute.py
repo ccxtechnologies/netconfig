@@ -15,11 +15,13 @@ class WGRoute:
     async def _set(
             self, ifname, ifindex, listen_port, fwmark, private_key, peer
     ):
+        await self.wg.setup_endpoint()
         return await self.wg.set(
                 ifname, ifindex, listen_port, fwmark, private_key, peer
         )
 
     async def _info(self, ifname, ifindex):
+        await self.wg.setup_endpoint()
         return await self.wg.info(ifname, ifindex)
 
     async def set(
