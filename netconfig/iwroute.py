@@ -17,6 +17,7 @@ class IWRoute:
         self.lock = asyncio.Lock()
 
     async def _set_tx_power_limit(self, phy_id, tx_power_dbm):
+        await self.iw.setup_endpoint()
 
         msg = nl80211cmd()
         msg['cmd'] = NL80211_NAMES['NL80211_CMD_SET_WIPHY']
@@ -33,12 +34,14 @@ class IWRoute:
         )
 
     async def _get_phy_device_ids(self, phy_id):
+        await self.iw.setup_endpoint()
         return [
                 intf.get_attr('NL80211_ATTR_IFINDEX')
                 for intf in await self.iw.get_interface_by_phy(phy_id)
         ]
 
     async def _get_id(self, phy_id, device_name):
+        await self.iw.setup_endpoint()
         for _id, _name in [
                 (
                         intf.get_attr('NL80211_ATTR_IFINDEX'),
@@ -53,6 +56,7 @@ class IWRoute:
     async def _add_device(
             self, phy_id: int, device_name: str, device_type: str
     ) -> int | None:
+        await self.iw.setup_endpoint()
         try:
             await self.iw.add_interface(
                     ifname=device_name, iftype=device_type, phy=phy_id
@@ -75,6 +79,7 @@ class IWRoute:
         return _id
 
     async def _get_phy_info(self, phy_id: int):
+        await self.iw.setup_endpoint()
         msg = nl80211cmd()
         msg['cmd'] = NL80211_NAMES['NL80211_CMD_GET_WIPHY']
         msg['attrs'] = [['NL80211_ATTR_WIPHY', phy_id]]
