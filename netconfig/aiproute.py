@@ -82,7 +82,7 @@ class AIPRoute():
             return None
 
         cache = {}
-        for neighbour in response:
+        async for neighbour in response:
             mac = None
             address = None
             confirmed_secs = None
