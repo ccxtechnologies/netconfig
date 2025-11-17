@@ -88,6 +88,17 @@ ETHTOOL_SRSSH = 0x00000047  # Set RX flow hash configuration
 ETHTOOL_GTUNABLE = 0x00000048  # Get tunable configuration
 ETHTOOL_STUNABLE = 0x00000049  # Set tunable configuration
 
+ETHTOOL_PHY_GTUNABLE = 0x0000004e
+ETHTOOL_PHY_STUNABLE = 0x0000004f
+
+# PHY Tunables
+ETHTOOL_PHY_DOWNSHIFT = 1
+ETHTOOL_PHY_FAST_LINK_DOWN = 2
+ETHTOOL_PHY_EDPD = 3
+
+ETHTOOL_TUNABLE_U8 = 1
+ETHTOOL_TUNABLE_U16 = 2
+
 
 class ethtool_cmd(ctypes.Structure):
     _pack_ = 1
@@ -137,12 +148,39 @@ class ethtool_value(ctypes.Structure):
     ]
 
 
+class ethtool_tunable_downshift(ctypes.Structure):
+    _pack_ = 1
+    _fields_ = [
+            ('cmd', ctypes.c_uint32),
+            ('id', ctypes.c_uint32),
+            ('type_id', ctypes.c_uint32),
+            ('len', ctypes.c_uint32),
+            ('count', ctypes.c_uint8),
+    ]
+
+
+class ethtool_tunable_edpd(ctypes.Structure):
+    _pack_ = 1
+    _fields_ = [
+            ('cmd', ctypes.c_uint32),
+            ('id', ctypes.c_uint32),
+            ('type_id', ctypes.c_uint32),
+            ('len', ctypes.c_uint32),
+            ('tx_msecs', ctypes.c_uint16),
+    ]
+
+
 class ifr_data(ctypes.Union):
     _pack_ = 1
     _fields_ = [
             ('ethtool_cmd_ptr', ctypes.POINTER(ethtool_cmd)),
             ('ethtool_value_ptr', ctypes.POINTER(ethtool_value)),
             ('ethtool_eee_ptr', ctypes.POINTER(ethtool_eee)),
+            (
+                    'ethtool_downshift_ptr',
+                    ctypes.POINTER(ethtool_tunable_downshift)
+            ),
+            ('ethtool_edpd_ptr', ctypes.POINTER(ethtool_tunable_edpd)),
     ]
 
 
@@ -329,10 +367,28 @@ class EthTool:
     ETH_MODULE_SFF_8436 = 0x4
     ETH_MODULE_SFF_8436_LEN = 256
 
+    # Energy Detect Power Down (EDPD)
+    PHY_EDPD_DFLT_TX_MSECS = 0xffff
+    PHY_EDPD_DISABLE = 0
+
     def __init__(self, ifname):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._name = (ctypes.c_ubyte *
                       IFNAMSIZ)(*bytearray(str(ifname).encode()))
+
+    def _ifreq_downshift(self):
+        ifr = ifreq()
+        ecmd = ethtool_tunable_downshift()
+        ifr.ifr_data.ethtool_downshift_ptr = ctypes.pointer(ecmd)
+        ifr.ifr_name = self._name  # noqa pylint: disable=attribute-defined-outside-init
+        return ifr, ecmd
+
+    def _ifreq_edpd(self):
+        ifr = ifreq()
+        ecmd = ethtool_tunable_edpd()
+        ifr.ifr_data.ethtool_edpd_ptr = ctypes.pointer(ecmd)
+        ifr.ifr_name = self._name  # noqa pylint: disable=attribute-defined-outside-init
+        return ifr, ecmd
 
     def _ifreq_eee(self):
         ifr = ifreq()
@@ -381,6 +437,40 @@ class EthTool:
 
         return self._dump_eee(ecmd)
 
+    def get_downshift(self):
+        ifr, ecmd = self._ifreq_downshift()
+
+        ecmd.cmd = ETHTOOL_PHY_GTUNABLE  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.id = ETHTOOL_PHY_DOWNSHIFT  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.type_id = ETHTOOL_TUNABLE_U8  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.len = 1  # noqa pylint: disable=attribute-defined-outside-init
+
+        try:
+            fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
+        except OSError as exc:
+            if exc.errno == 95:
+                return None
+            raise
+
+        return self._dump_downshift(ecmd)
+
+    def get_edpd(self):
+        ifr, ecmd = self._ifreq_edpd()
+
+        ecmd.cmd = ETHTOOL_PHY_GTUNABLE  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.id = ETHTOOL_PHY_EDPD  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.type_id = ETHTOOL_TUNABLE_U16  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.len = 2  # noqa pylint: disable=attribute-defined-outside-init
+
+        try:
+            fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
+        except OSError as exc:
+            if exc.errno == 95:
+                return None
+            raise
+
+        return self._dump_edpd(ecmd)
+
     def link_detected(self):
         ifr, evalue = self._ifreq_value()
 
@@ -392,6 +482,68 @@ class EthTool:
             if exc.errno == 45:
                 return False
             raise
+
+    def update_downshift(self, count):
+        ifr, ecmd = self._ifreq_downshift()
+
+        ecmd.cmd = ETHTOOL_PHY_GTUNABLE  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.id = ETHTOOL_PHY_DOWNSHIFT  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.type_id = ETHTOOL_TUNABLE_U8  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.len = 1  # noqa pylint: disable=attribute-defined-outside-init
+
+        try:
+            fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
+        except OSError as exc:
+            if exc.errno == 95:
+                # operation not supported
+                return
+            raise
+
+        ecmd.cmd = ETHTOOL_PHY_STUNABLE  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.count = count  # noqa pylint: disable=attribute-defined-outside-init
+        fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
+
+    def enable_edpd(self):
+
+        ifr, ecmd = self._ifreq_edpd()
+
+        ecmd.cmd = ETHTOOL_PHY_GTUNABLE  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.id = ETHTOOL_PHY_EDPD  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.type_id = ETHTOOL_TUNABLE_U16  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.len = 2  # noqa pylint: disable=attribute-defined-outside-init
+
+        try:
+            fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
+        except OSError as exc:
+            # operation not supported
+            if exc.errno == 95:
+                return
+            raise
+
+        ecmd.cmd = ETHTOOL_PHY_STUNABLE  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.tx_msecs = self.PHY_EDPD_DFLT_TX_MSECS  # noqa pylint: disable=attribute-defined-outside-init
+        fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
+
+    def disable_edpd(self):
+
+        ifr, ecmd = self._ifreq_edpd()
+
+        ecmd.cmd = ETHTOOL_PHY_GTUNABLE  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.id = ETHTOOL_PHY_EDPD  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.type_id = ETHTOOL_TUNABLE_U16  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.len = 2  # noqa pylint: disable=attribute-defined-outside-init
+
+        try:
+            fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
+        except OSError as exc:
+            # operation not supported
+            if exc.errno == 95:
+                return
+            raise
+
+        ecmd.cmd = ETHTOOL_PHY_STUNABLE  # noqa pylint: disable=attribute-defined-outside-init
+        ecmd.tx_msecs = self.PHY_EDPD_DISABLE  # noqa pylint: disable=attribute-defined-outside-init
+        fcntl.ioctl(self.sock, SIOCETHTOOL, ifr)
 
     def enable_eee(self):
         ifr, ecmd = self._ifreq_eee()
@@ -558,5 +710,19 @@ class EthTool:
         settings["link_partner"] = self._dump_advertised(ep.lp_advertised)
         settings["enabled"] = bool(ep.eee_enabled)
         settings["active"] = bool(ep.eee_active)
+
+        return settings
+
+    def _dump_downshift(self, ep):
+        settings = {}
+        settings["enabled"] = bool(ep.count)
+        settings["count"] = ep.count
+
+        return settings
+
+    def _dump_edpd(self, ep):
+        settings = {}
+        settings["enabled"] = bool(ep.tx_msecs)
+        settings["tx_msecs"] = ep.tx_msecs
 
         return settings
