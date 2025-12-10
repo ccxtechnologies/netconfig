@@ -1,5 +1,4 @@
-#!/usr/bin/python
-# Copyright: 2017-2022, CCX Technologies
+# Copyright: 2017-2025, CCX Technologies
 
 import socket
 import struct
@@ -19,8 +18,8 @@ RTM_NEWLINK = 16
 NLMSG_NOOP = 0x1  # Nothing
 NLMSG_ERROR = 0x2  # Error
 
-IFF_UP = (1 << 0)
-IFF_LOWER_UP = (1 << 16)
+IFF_UP = 1 << 0
+IFF_LOWER_UP = 1 << 16
 
 IFLA_IFNAME = 3
 
@@ -48,40 +47,26 @@ async def monitor_state_change(queues):
         start_sent = False
 
         # I would like to use something like asyncio.open_connection but
-        # it doesn't understand socket.AF_NETLINK / socket.SOCK_RAW so have to
-        # use the _create_connection_transport method
+        # it doesn't understand socket.AF_NETLINK / socket.SOCK_RAW
         loop = asyncio.get_event_loop()
-
-        if isinstance(loop, asyncio.unix_events._UnixSelectorEventLoop):  # noqa pylint: disable=protected-access
-            reader = asyncio.streams.StreamReader(loop=loop)
-            protocol = asyncio.streams.StreamReaderProtocol(reader, loop=loop)
-            await loop._create_connection_transport(  # noqa pylint: disable=protected-access
-                    skt, lambda: protocol, None, ''
-            )
 
         while True:
             try:
-                if isinstance(
-                        loop,
-                        asyncio.unix_events._UnixSelectorEventLoop  # noqa pylint: disable=protected-access
-                ):
-                    data = await reader.read(READ_SIZE)
-                else:
-                    data = await loop.sock_recv(skt, READ_SIZE)
+                data = await loop.sock_recv(skt, READ_SIZE)
             except OSError as exc:
                 if exc.errno == 105:
                     # No buffer space so retry later
                     start_sent = False
                     await asyncio.sleep(3.2)
                     continue
-                else:
-                    raise
+                raise
 
             msg_len, msg_type, flags, _, _ = struct.unpack("=LHHLL", data[:16])
 
             if msg_type == NLMSG_NOOP:
                 continue
-            elif msg_type == NLMSG_ERROR:
+
+            if msg_type == NLMSG_ERROR:
                 raise RuntimeError("Netlink Message Error")
 
             if msg_type != RTM_NEWLINK:
@@ -103,6 +88,8 @@ async def monitor_state_change(queues):
 
             remaining = msg_len - 32
             data = data[16:]
+
+            iface = ""
 
             while remaining:
                 rta_len, rta_type = struct.unpack("=HH", data[:4])

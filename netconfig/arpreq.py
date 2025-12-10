@@ -1,13 +1,13 @@
 #!/usr/bin/python
-# Copyright: 2022, CCX Technologies
+# Copyright: 2022-2025, CCX Technologies
 
 import socket
 import time
-import netaddr
 import asyncio
-import async_timeout
-
 from struct import pack, unpack
+
+import netaddr
+import async_timeout
 
 READ_SIZE = 1024
 
@@ -25,16 +25,8 @@ async def arpreq(
         _socket.bind((if_name, socket.SOCK_RAW))
 
         # I would like to use something like asyncio.open_connection but
-        # it doesn't understand socket.AF_RAW / socket.SOCK_RAW so have to
-        # use the _create_connection_transport method
+        # it doesn't understand socket.AF_RAW / socket.SOCK_RAW
         loop = asyncio.get_event_loop()
-
-        if type(loop) == asyncio.unix_events._UnixSelectorEventLoop:  # noqa pylint:disable=protected-access
-            reader = asyncio.streams.StreamReader(loop=loop)
-            protocol = asyncio.streams.StreamReaderProtocol(reader, loop=loop)
-            await loop._create_connection_transport(  # type: ignore [attr-defined] # noqa pylint:disable=protected-access
-                    _socket, lambda: protocol, None, ''
-            )
 
         frame_list = [
                 pack('!6B',
@@ -60,10 +52,7 @@ async def arpreq(
             async with async_timeout.timeout(
                     (timeout + 2) - (recv_time - send_time)
             ):
-                if type(loop) == asyncio.unix_events._UnixSelectorEventLoop:  # noqa pylint:disable=protected-access
-                    frame = await reader.read(READ_SIZE)
-                else:
-                    frame = await loop.sock_recv(_socket, READ_SIZE)
+                frame = await loop.sock_recv(_socket, READ_SIZE)
 
             recv_time = time.time()
 
