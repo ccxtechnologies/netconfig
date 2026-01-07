@@ -1,5 +1,4 @@
-#!/usr/bin/python
-# Copyright: 2022, CCX Technologies
+# Copyright: 2022-2026, CCX Technologies
 
 import asyncio
 from functools import partial
@@ -22,6 +21,17 @@ class IWRoute:
         self.executor = executor
         self.iw = IW()
         self.lock = asyncio.Lock()
+
+    def _set_regulatory_domain(self, country_code: str):
+        msg = nl80211cmd()
+        msg['cmd'] = NL80211_NAMES['NL80211_CMD_REQ_SET_REG']
+        msg['attrs'] = [['NL80211_ATTR_REG_ALPHA2', country_code.upper()]]
+
+        self.iw.nlm_request(
+                msg,
+                msg_type=self.iw.prid,
+                msg_flags=NLM_F_REQUEST | NLM_F_ACK,
+        )
 
     def _set_tx_power_limit(self, phy_id, tx_power_dbm):
 
@@ -69,8 +79,8 @@ class IWRoute:
                 raise FileExistsError(
                         f"Device {device_name} already exists"
                 ) from exc
-            else:
-                raise
+
+            raise
 
         for _ in range(0, 10):
             _id = self._get_id(phy_id, device_name)
@@ -183,6 +193,13 @@ class IWRoute:
             await self.loop.run_in_executor(
                     self.executor,
                     partial(self._set_tx_power_limit, phy_id, tx_power_dbm)
+            )
+
+    async def set_regulatory_domain(self, country_code: str) -> None:
+        async with self.lock:
+            await self.loop.run_in_executor(
+                    self.executor,
+                    partial(self._set_regulatory_domain, country_code)
             )
 
     def close(self):
