@@ -1,3 +1,3 @@
 # == Copyright: 2017-2026, CCX Technologies
 
-__version__ = "1.4.2"
+__version__ = "1.4.3"

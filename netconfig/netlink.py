@@ -1,4 +1,4 @@
-# Copyright: 2017-2025, CCX Technologies
+# Copyright: 2017-2026, CCX Technologies
 
 import socket
 import struct
@@ -55,10 +55,17 @@ async def monitor_state_change(queues):
                 data = await loop.sock_recv(skt, READ_SIZE)
             except OSError as exc:
                 if exc.errno == 105:
-                    # No buffer space so retry later
+                    # No buffer space so drain and reset start_sent to re-sync
+                    try:
+                        while True:
+                            skt.recv(READ_SIZE)
+                    except (BlockingIOError, OSError):
+                        pass
+
                     start_sent = False
                     await asyncio.sleep(3.2)
                     continue
+
                 raise
 
             msg_len, msg_type, flags, _, _ = struct.unpack("=LHHLL", data[:16])
